@@ -1,6 +1,5 @@
 package com.iteaj.network.device.client.gateway.jlzn;
 
-import cn.hutool.http.Method;
 import com.iteaj.iot.client.http.HttpMethod;
 import com.iteaj.iot.client.http.HttpRequestMessage;
 

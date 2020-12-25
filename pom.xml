@@ -41,7 +41,6 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <paho.version>1.2.5</paho.version>
         <hutool.version>4.1.1</hutool.version>
         <fastjson.version>1.2.70</fastjson.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
