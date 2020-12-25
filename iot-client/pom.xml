@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>iot-client</artifactId>
-    <description>基于netty的tcp客户端</description>
+    <description>基于netty的tcp, http等协议的客户端</description>
 
     <dependencies>
         <dependency>
@@ -24,7 +24,6 @@
             <artifactId>okhttp</artifactId>
             <groupId>com.squareup.okhttp3</groupId>
         </dependency>
-
 
     </dependencies>
 </project>

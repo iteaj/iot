@@ -3,7 +3,7 @@ package com.iteaj.network.client.app;
 import com.alibaba.fastjson.JSONObject;
 import com.iteaj.network.ProtocolException;
 import com.iteaj.network.client.ClientMessage;
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.StringUtils;
 
 import java.beans.Transient;
 
@@ -37,7 +37,7 @@ public class AppClientMessage<T extends AppClientMessageBody> extends ClientMess
     public static AppClientMessage<AppClientMessageBody> getInstance(String deviceSn, AppTradeType tradeType, AppClientMessageBody messageBody) {
         if(null == messageBody) throw new ProtocolException("请传入正确的操作内容");
         if(null == tradeType) throw new ProtocolException("请传入正确的操作类型");
-        if(StringUtils.isBlank(deviceSn)) throw new ProtocolException("请传入要操作的设备的设备编号");
+        if(!StringUtils.hasText(deviceSn)) throw new ProtocolException("请传入要操作的设备的设备编号");
 
         AppClientMessage appClientMessage = new AppClientMessage(AppClientType.App_Client_Server);
         AppClientMessageHead appClientMessageHead = new AppClientMessageHead(null

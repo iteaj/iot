@@ -27,11 +27,5 @@
             <artifactId>iot-server</artifactId>
             <version>${project.version}</version>
         </dependency>
-
-        <dependency>
-            <optional>true</optional>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-        </dependency>
     </dependencies>
 </project>

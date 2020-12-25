@@ -2,11 +2,11 @@ package com.iteaj.network.business;
 
 import com.iteaj.network.Protocol;
 import com.iteaj.network.ProtocolHandle;
-import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.*;
+import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
@@ -66,7 +66,7 @@ public abstract class BusinessFactory<T extends ProtocolHandle> implements Initi
         Map<String, T> beansOfType = beanFactory.getBeansOfType(getServiceClass());
 
         //注册协议对象到业务4工厂
-        if(MapUtils.isEmpty(beansOfType)) {
+        if(CollectionUtils.isEmpty(beansOfType)) {
             logger.warn("注册协议业务 - 没有业务对象被注册：{}" + ProtocolHandle.class.getName());
         } else {
             for (T item : beansOfType.values()) {

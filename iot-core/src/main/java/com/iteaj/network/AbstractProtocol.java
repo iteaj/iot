@@ -1,9 +1,9 @@
 package com.iteaj.network;
 
 import com.iteaj.network.consts.ExecStatus;
-import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -107,7 +107,7 @@ public abstract class AbstractProtocol<M extends AbstractMessage> implements Pro
     }
 
     public AbstractProtocol addParam(String key, Object value){
-        if(MapUtils.isEmpty(param))
+        if(CollectionUtils.isEmpty(param))
             param = new HashMap<>();
 
         param.put(key, value);
@@ -116,7 +116,7 @@ public abstract class AbstractProtocol<M extends AbstractMessage> implements Pro
     }
 
     public AbstractProtocol removeParam(String key){
-        if(MapUtils.isEmpty(param))
+        if(CollectionUtils.isEmpty(param))
             return this;
 
         param.remove(key);
@@ -124,7 +124,7 @@ public abstract class AbstractProtocol<M extends AbstractMessage> implements Pro
     }
 
     public Object getParam(String key){
-        if(MapUtils.isEmpty(param))
+        if(CollectionUtils.isEmpty(param))
             return null;
 
         return param.get(key);
