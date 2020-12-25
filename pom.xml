@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <version>2.2.4.RELEASE</version>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+    </parent>
+
+    <packaging>pom</packaging>
+    <groupId>com.iteaj</groupId>
+    <artifactId>iot</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+
+    <description>基于Netty和Spring Boot的网络通讯框架(物联网)</description>
+
+    <developers>
+        <developer>
+            <name>iteaj</name>
+            <email>iteaj@outlook.com</email>
+            <url>http://www.iteaj.com</url>
+        </developer>
+    </developers>
+
+    <scm>
+        <url>https://gitee.com/iteaj/iot</url>
+        <connection>scm:git:https://gitee.com/iteaj/iot.git</connection>
+        <developerConnection>scm:git:https://gitee.com/iteaj/iot.git</developerConnection>
+    </scm>
+
+    <modules>
+        <module>iot-core</module>
+        <module>iot-client</module>
+        <module>iot-server</module>
+        <module>iot-devices</module>
+        <module>iot-redis</module>
+    </modules>
+
+    <properties>
+        <java.version>1.8</java.version>
+        <paho.version>1.2.5</paho.version>
+        <hutool.version>4.1.1</hutool.version>
+        <fastjson.version>1.2.70</fastjson.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>jubo</id>
+            <url>http://106.54.253.121:8081/repository/upload-snapshot/</url>
+        </repository>
+    </distributionManagement>
+
+    <dependencies>
+        <dependency>
+            <artifactId>spring-boot</artifactId>
+            <groupId>org.springframework.boot</groupId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>${fastjson.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>${hutool.version}</version>
+        </dependency>
+
+        <dependency>
+            <optional>true</optional>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <!-- 绑定source插件到Maven的生命周期,并在生命周期后执行绑定的source的goal -->
+                <executions>
+                    <execution>
+                        <!-- 绑定source插件到Maven的生命周期 -->
+                        <phase>compile</phase>
+
+                        <!--在生命周期后执行绑定的source插件的goals -->
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
