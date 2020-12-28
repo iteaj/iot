@@ -45,6 +45,8 @@ public class BreakerThreeRealData extends BreakerDeviceRequestProtocol {
     private double ni; //N 线电流 2 HEX data N 线电流，精确度 0.01A
     private double nct; //N 线温度 1 HEX data N 线温度，补码格式，-127~128 温度
 
+    private int times; // 开关次数
+
     public BreakerThreeRealData(BreakerMessage requestMessage) {
         super(requestMessage);
     }
@@ -88,6 +90,7 @@ public class BreakerThreeRealData extends BreakerDeviceRequestProtocol {
 
         this.ni = BreakerUtils.hexToInt(data, 54, 2) * 0.01;
         this.nct = BreakerUtils.hexToInt(data, 56, 1);
+        this.times = BreakerUtils.hexToInt(data, 57, 4);
     }
 
     @Override
@@ -319,4 +322,7 @@ public class BreakerThreeRealData extends BreakerDeviceRequestProtocol {
         this.cct = cct;
     }
 
+    public int getTimes() {
+        return times;
+    }
 }

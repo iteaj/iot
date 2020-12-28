@@ -15,9 +15,9 @@ import java.util.Map;
 /**
  * <p>业务工厂</p>
  * 通过协议类型获取对应的协议业务
- * Create Date By 2017-09-21
+ * Create Date By 2020-09-21
  * @author iteaj
- * @since 1.7
+ * @since 1.8
  */
 public abstract class BusinessFactory<T extends ProtocolHandle> implements InitializingBean, BeanFactoryAware {
 
@@ -43,7 +43,7 @@ public abstract class BusinessFactory<T extends ProtocolHandle> implements Initi
         // 协议类型不能是抽象类和接口
         int modifiers = type.getModifiers();
         if(Modifier.isAbstract(modifiers) || Modifier.isInterface(modifiers)) {
-            logger.error("注册协议处理器失败 错误的协议类型(不能是抽象类和接口)[{}] - 业务类型：{}<T> - 说明: 业务对象智能注册到真实的协议对象, 必须指定泛型T "
+            logger.error("注册协议处理器失败 错误的协议类型(不能是抽象类和接口)[{}] - 业务类型：{}<T> - 说明: 业务对象只能注册到具体的实现协议, 必须指定泛型T "
                     , type.getSimpleName(), business.getClass().getSimpleName());
             throw new BeanInitializationException("错误的协议类型(不能是抽象类和接口)["+type.getName()+"]");
         }
@@ -59,7 +59,7 @@ public abstract class BusinessFactory<T extends ProtocolHandle> implements Initi
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         mapper = new HashMap<>();
 
         //获取所有的协议业务的对象
