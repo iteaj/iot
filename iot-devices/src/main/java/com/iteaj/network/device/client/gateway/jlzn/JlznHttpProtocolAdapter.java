@@ -4,6 +4,7 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.iteaj.iot.client.http.HttpClientProtocol;
 import com.iteaj.iot.client.http.HttpResponseMessage;
+import com.iteaj.network.ProtocolException;
 
 /**
  * 渐朗智能网关使用Http请求协议
@@ -36,11 +37,17 @@ public abstract class JlznHttpProtocolAdapter extends HttpClientProtocol {
 
     @Override
     protected void resolverResponseMessage(HttpResponseMessage content) {
-        JSONObject jsonObject = JSONUtil.parseObj(content.getMessage("UTF-8"));
+        int code = content.getCode();
+        if(code == 200) {
+            JSONObject jsonObject = JSONUtil.parseObj(content.getMessage("UTF-8"));
 
-        JSONObject responseParams = jsonObject.getJSONObject("response_params");
-        this.statusMsg = responseParams.getStr("status_msg");
-        this.statusCode = responseParams.getInt("status_code");
+            JSONObject responseParams = jsonObject.getJSONObject("response_params");
+            this.statusMsg = responseParams.getStr("status_msg");
+            this.statusCode = responseParams.getInt("status_code");
+        } else {
+            throw new ProtocolException("请求失败, 状态码["+code+"]");
+        }
+
     }
 
     public boolean isOk() {

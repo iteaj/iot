@@ -7,6 +7,8 @@ import cn.hutool.json.JSONUtil;
 import com.iteaj.iot.client.http.HttpMethod;
 import com.iteaj.iot.client.http.HttpRequestMessage;
 import com.iteaj.iot.client.http.HttpResponseMessage;
+import com.iteaj.network.ProtocolException;
+import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -25,10 +27,16 @@ public class JlznDeviceListInfo extends JlznHttpProtocolAdapter{
 
     @Override
     protected void resolverResponseMessage(HttpResponseMessage content) {
-        String message = content.getMessage("UTF-8");
-        JSONObject jsonObject = JSONUtil.parseObj(message);
-        JSONArray jsonArray = jsonObject.getJSONArray("response_params");
-        this.devices = JSONUtil.toList(jsonArray, JlznEntity.class);
+        int code = content.getCode();
+        if(code == 200) {
+            String message = content.getMessage("UTF-8");
+
+            JSONObject jsonObject = JSONUtil.parseObj(message);
+            JSONArray jsonArray = jsonObject.getJSONArray("response_params");
+            this.devices = JSONUtil.toList(jsonArray, JlznEntity.class);
+        } else {
+            throw new ProtocolException("请求失败, 状态码["+code+"]");
+        }
     }
 
     @Override
