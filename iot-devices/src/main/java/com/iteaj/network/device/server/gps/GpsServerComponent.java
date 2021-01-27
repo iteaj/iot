@@ -6,7 +6,6 @@ import com.iteaj.network.device.server.DeviceServerProperties;
 import com.iteaj.network.server.DeviceServerComponent;
 import com.iteaj.network.server.IotDeviceServer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * create time: 2021/1/14
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Component;
  * @author iteaj
  * @since 1.0
  */
-@Component
 public class GpsServerComponent extends DeviceServerComponent {
 
     @Autowired
