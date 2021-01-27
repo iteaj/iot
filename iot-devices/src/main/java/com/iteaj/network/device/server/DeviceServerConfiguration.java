@@ -4,6 +4,7 @@ import com.iteaj.network.IotServeBootstrap;
 import com.iteaj.network.device.client.DeviceClientProperties;
 import com.iteaj.network.device.server.env.EnvServerComponent;
 import com.iteaj.network.device.server.env.m702.EnvM702ServerComponent;
+import com.iteaj.network.device.server.gps.GpsServerComponent;
 import com.iteaj.network.device.server.ths.ThsServerComponent;
 import com.iteaj.network.device.server.pdu.PduServerComponent;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -53,5 +54,16 @@ public class DeviceServerConfiguration {
     @ConditionalOnExpression("!${iot.device.server.m702.port:'0'}.equals('0')")
     public EnvM702ServerComponent envM702ServerComponent() {
         return new EnvM702ServerComponent();
+    }
+
+    /**
+     * Gps定位设备
+     * <h4>道路运输车辆主动安全智能防控系统</h4>
+     * @return
+     */
+    @Bean
+    @ConditionalOnExpression("!${iot.device.server.gps.port:'0'}.equals('0')")
+    public GpsServerComponent gpsServerComponent() {
+        return new GpsServerComponent();
     }
 }

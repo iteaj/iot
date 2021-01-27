@@ -26,6 +26,12 @@ public class DeviceServerProperties {
      */
     private ServerConfig m702;
 
+    /**
+     * Gps定位设备 <h4>道路运输车辆主动安全智能防控系统</h4>
+     * @see com.iteaj.network.device.server.gps.GpsDeviceServer
+     */
+    private ServerConfig gps;
+
     public ServerConfig getPdu() {
         return pdu;
     }
@@ -56,6 +62,14 @@ public class DeviceServerProperties {
 
     public void setM702(ServerConfig m702) {
         this.m702 = m702;
+    }
+
+    public ServerConfig getGps() {
+        return gps;
+    }
+
+    public void setGps(ServerConfig gps) {
+        this.gps = gps;
     }
 
     public static class ServerConfig extends DeviceProperties {
