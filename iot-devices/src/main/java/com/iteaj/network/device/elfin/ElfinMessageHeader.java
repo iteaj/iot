@@ -1,12 +1,13 @@
 package com.iteaj.network.device.elfin;
 
 import com.iteaj.network.Message;
+import com.iteaj.network.ProtocolType;
 
 public class ElfinMessageHeader implements Message.MessageHead {
     protected String equipCode;
-    private ElfinType envTradeType;
+    private ProtocolType envTradeType;
 
-    public ElfinMessageHeader(String equipCode, ElfinType tradeType) {
+    public ElfinMessageHeader(String equipCode, ProtocolType tradeType) {
         this.equipCode = equipCode;
         this.envTradeType = tradeType;
     }
@@ -26,7 +27,7 @@ public class ElfinMessageHeader implements Message.MessageHead {
     }
 
     @Override
-    public ElfinType getTradeType() {
+    public ProtocolType getTradeType() {
         return this.envTradeType;
     }
 

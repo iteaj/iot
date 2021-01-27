@@ -1,5 +1,6 @@
 package com.iteaj.network.device.server.env;
 
+import com.iteaj.network.ProtocolType;
 import com.iteaj.network.device.elfin.ElfinMessage;
 import com.iteaj.network.device.elfin.ElfinMessageBody;
 import com.iteaj.network.device.elfin.ElfinMessageHeader;
@@ -23,5 +24,10 @@ public class EnvElfinMessage extends ElfinMessage {
     public EnvElfinMessage build() {
         this.messageHead = new ElfinMessageHeader(this.getEquipCode(), getTradeType());
         return this;
+    }
+
+    @Override
+    public ElfinType getTradeType() {
+        return (ElfinType) super.getTradeType();
     }
 }

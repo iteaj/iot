@@ -1,5 +1,6 @@
 package com.iteaj.network.device.server.ths;
 
+import com.iteaj.network.ProtocolType;
 import com.iteaj.network.device.elfin.ElfinMessage;
 import com.iteaj.network.device.elfin.ElfinMessageBody;
 import com.iteaj.network.device.elfin.ElfinMessageHeader;
@@ -27,5 +28,10 @@ public class ThsElfinMessage extends ElfinMessage {
     public ThsElfinMessage build() {
         this.messageHead = new ElfinMessageHeader(this.getEquipCode(), getTradeType());
         return this;
+    }
+
+    @Override
+    public ElfinType getTradeType() {
+        return (ElfinType) super.getTradeType();
     }
 }

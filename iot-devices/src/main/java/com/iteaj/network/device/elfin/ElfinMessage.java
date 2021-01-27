@@ -1,5 +1,6 @@
 package com.iteaj.network.device.elfin;
 
+import com.iteaj.network.ProtocolType;
 import com.iteaj.network.message.UnParseBodyMessage;
 import com.iteaj.network.utils.ByteUtil;
 
@@ -8,9 +9,9 @@ import java.io.IOException;
 public abstract class ElfinMessage extends UnParseBodyMessage {
 
     private String equipCode;
-    private ElfinType tradeType;
+    private ProtocolType tradeType;
 
-    public ElfinMessage(byte[] message, String equipCode, ElfinType tradeType) {
+    public ElfinMessage(byte[] message, String equipCode, ProtocolType tradeType) {
         super(message);
         this.equipCode = equipCode;
         this.tradeType = tradeType;
@@ -31,7 +32,7 @@ public abstract class ElfinMessage extends UnParseBodyMessage {
         this.equipCode = equipCode;
     }
 
-    public ElfinType getTradeType() {
+    public ProtocolType getTradeType() {
         return tradeType;
     }
 

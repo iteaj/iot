@@ -118,13 +118,17 @@ public abstract class HttpClientProtocol implements Protocol {
          * 如果是同步的話, 先解析报文, 然后再执行业务
          */
         if(this.isSync()) {
-            resolverResponseMessage(responseMessage);
+            try {
+                resolverResponseMessage(responseMessage);
 
-            if(handle != null) {
-                handle.business(this);
+                if(handle != null) {
+                    handle.business(this);
+                }
+
+                return (T) this;
+            } catch (Exception e) {
+                throw new HttpProtocolException("解析设备报文错误", e);
             }
-
-            return (T) this;
         } else {
             return null;
         }
