@@ -1,6 +1,7 @@
 package com.iteaj.network.device.client.breaker.fzwu.protocol;
 
 
+import com.iteaj.iot.client.mqtt.MqttBrokerRequestProtocol;
 import com.iteaj.network.device.client.breaker.fzwu.BreakerDeviceRequestProtocol;
 import com.iteaj.network.device.client.breaker.fzwu.BreakerMessage;
 import com.iteaj.network.device.client.breaker.fzwu.BreakerType;
@@ -20,8 +21,21 @@ public class BreakerOfflineHandle extends BreakerDeviceRequestProtocol {
         return BreakerType.Offline;
     }
 
+    /**
+     * 无需构建请求
+     * @param requestMessage
+     */
     @Override
     protected void doBuildRequestMessage(MqttClientMessage requestMessage) {
 
+    }
+
+    /**
+     * 无需响应
+     * @return
+     */
+    @Override
+    public MqttBrokerRequestProtocol buildResponseMessage() {
+        return this;
     }
 }
