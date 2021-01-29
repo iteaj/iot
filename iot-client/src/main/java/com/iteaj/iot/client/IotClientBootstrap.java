@@ -17,6 +17,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -88,6 +89,14 @@ public class IotClientBootstrap implements InitializingBean, ApplicationListener
 
     public static ProtocolTimeoutStorage getTimeoutStorage(Class<? extends ClientMessage> clazz) {
         return clientComponentFactory.getByClass(clazz).protocolTimeoutStorage();
+    }
+
+    /**
+     * 发布应用事件
+     * @param event
+     */
+    public static void publishApplicationEvent(ApplicationEvent event) {
+        applicationContext.publishEvent(event);
     }
 
     @Override
