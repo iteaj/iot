@@ -3,7 +3,6 @@ package com.iteaj.network.server.codec;
 import com.iteaj.network.*;
 import com.iteaj.network.server.DeviceServerComponent;
 import com.iteaj.network.server.ServerComponentFactory;
-import com.iteaj.network.message.DeviceMessageHead;
 import com.iteaj.network.server.protocol.DeviceRequestProtocol;
 import com.iteaj.network.server.protocol.PlatformRequestProtocol;
 import io.netty.buffer.Unpooled;
@@ -24,7 +23,6 @@ public class DeviceProtocolEncoder extends MessageToMessageEncoder<AbstractProto
 
     /**
      * 存储消息id和协议的映射关系
-     * @see DeviceMessageHead#getMessageId()  报文的消息id
      * @see Protocol 协议
      *
      */

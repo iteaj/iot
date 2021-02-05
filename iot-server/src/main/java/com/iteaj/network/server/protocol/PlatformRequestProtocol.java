@@ -11,7 +11,6 @@ import com.iteaj.network.client.app.AppClientResponseBody;
 import com.iteaj.network.client.app.AppClientUtil;
 import com.iteaj.network.consts.ExecStatus;
 import com.iteaj.network.server.AbstractServerProtocol;
-import com.iteaj.network.message.DeviceMessageHead;
 import com.iteaj.network.server.manager.DevicePipelineManager;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -147,7 +146,7 @@ public abstract class PlatformRequestProtocol<M extends AbstractMessage> extends
 
     /**
      * 用来做为将请求报文和响应报文进行关联的key
-     * 默认用报文头的{@link DeviceMessageHead#getMessageId()}作为key
+     * 默认用报文头的{@link com.iteaj.network.Message.MessageHead#getMessageId()}作为key
      * @return
      */
     public Object relationKey(){
