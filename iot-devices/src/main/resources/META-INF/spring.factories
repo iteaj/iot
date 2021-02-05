@@ -1,4 +1,0 @@
-# Auto Configure
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.iteaj.network.device.server.DeviceServerConfiguration,\
-com.iteaj.network.device.client.DeviceClientConfiguration

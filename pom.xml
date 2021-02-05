@@ -14,7 +14,7 @@
     <groupId>com.iteaj</groupId>
     <artifactId>iot</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <url>https://gitee.com/iteaj/iot</url>
+    <url>https://github.com/iteaj/iot.git</url>
 
     <description>基于Netty和Spring Boot的网络通讯框架(物联网)</description>
 
@@ -34,16 +34,15 @@
     </licenses>
 
     <scm>
-        <url>https://gitee.com/iteaj/iot</url>
-        <connection>scm:git:https://gitee.com/iteaj/iot.git</connection>
-        <developerConnection>scm:git:https://gitee.com/iteaj/iot.git</developerConnection>
+        <url>https://github.com/iteaj/iot.git</url>
+        <connection>scm:git:https://github.com/iteaj/iot.git</connection>
+        <developerConnection>scm:git:https://github.com/iteaj/iot.git</developerConnection>
     </scm>
 
     <modules>
         <module>iot-core</module>
         <module>iot-client</module>
         <module>iot-server</module>
-        <module>iot-devices</module>
         <module>iot-redis</module>
     </modules>
 
