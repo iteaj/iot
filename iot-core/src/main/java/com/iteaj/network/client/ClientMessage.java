@@ -2,7 +2,6 @@ package com.iteaj.network.client;
 
 import com.iteaj.network.message.UnParseBodyMessage;
 import com.iteaj.network.utils.ByteUtil;
-import com.iteaj.network.utils.MessageUtil;
 
 import java.io.IOException;
 import java.util.UUID;
