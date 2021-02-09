@@ -165,8 +165,9 @@ public class ByteUtil {
 	}
 
 	/**
-	 * 将int数值转换为占四个字节的byte数组，本方法适用于(低位在前，高位在后)的顺序。 和bytesToInt配套使用
+	 * 将int数值转换为占四个字节的byte数组，本方法适用于(低位在前，高位在后)的顺序
 	 *
+	 * @see #bytesToInt(byte[])
 	 * @param value
 	 *            要转换的int值
 	 * @return byte数组
@@ -177,6 +178,23 @@ public class ByteUtil {
 		src[2] = (byte) ((value >> 16) & 0xFF);
 		src[1] = (byte) ((value >> 8) & 0xFF);
 		src[0] = (byte) (value & 0xFF);
+		return src;
+	}
+
+	/**
+	 * 将int数值转换为占四个字节的byte数组，本方法适用于(高位在前，地位在后)的顺序
+	 *
+	 * @see #bytesToIntOfNegate(byte[])
+	 * @param value
+	 *            要转换的int值
+	 * @return byte数组
+	 */
+	public static byte[] intToBytesOfNegate(int value) {
+		byte[] src = new byte[4];
+		src[0] = (byte) ((value >> 24) & 0xFF);
+		src[1] = (byte) ((value >> 16) & 0xFF);
+		src[2] = (byte) ((value >> 8) & 0xFF);
+		src[3] = (byte) (value & 0xFF);
 		return src;
 	}
 
@@ -208,6 +226,27 @@ public class ByteUtil {
 		value = ((src[0] & 0xFF) | ((src[1] & 0xFF) << 8)
 				| ((src[2] & 0xFF) << 16) | ((src[3] & 0xFF) << 24));
 		return value;
+	}
+
+	/**
+	 * byte数组中取int数值，本方法适用于(高位在前，低位在后)的顺序
+	 * @param src
+	 * @return
+	 */
+	public static int bytesToIntOfNegate(byte[] src) {
+		return ((src[3] & 0xFF) | ((src[2] & 0xFF) << 8)
+				| ((src[1] & 0xFF) << 16) | ((src[0] & 0xFF) << 24));
+	}
+
+	/**
+	 * byte数组中取int数值，本方法适用于(高位在前，低位在后)的顺序
+	 * @param src
+	 * @return
+	 */
+	public static int bytesToIntOfNegate(byte[] src, int offset) {
+		src = subBytes(src, offset, offset + 4);
+		return ((src[3] & 0xFF) | ((src[2] & 0xFF) << 8)
+				| ((src[1] & 0xFF) << 16) | ((src[0] & 0xFF) << 24));
 	}
 
 	/**
@@ -480,6 +519,18 @@ public class ByteUtil {
 		byte[] src = subBytes(message, offset, offset + 2);
 		return (short) (((src[0] & 0xFF) << 8) | ((src[1] & 0xFF)));
 	}
+
+	/**
+	 * 高位在前, 地位在后
+	 * @param message
+	 * @param offset
+	 * @return
+	 */
+	public static short bytesToShortOfNegate(byte[] message, int offset) {
+		byte[] src = subBytes(message, offset, offset + 2);
+		return (short) (((src[1] & 0xFF) << 8) | ((src[0] & 0xFF)));
+	}
+
 	/**
 	 *
 	 * @param value
@@ -490,6 +541,19 @@ public class ByteUtil {
 		byte[] src = new byte[2];
 		src[0] = (byte) ((value >> 8) & 0xFF);
 		src[1] = (byte) (value & 0xFF);
+		return src;
+	}
+
+	/**
+	 *
+	 * @param value
+	 *            要转换的int值
+	 * @return byte数组
+	 */
+	public static byte[] shortToBytesOfNegate(short value) {
+		byte[] src = new byte[2];
+		src[0] = (byte) (value & 0xFF);
+		src[1] = (byte) ((value >> 8) & 0xFF);
 		return src;
 	}
 
