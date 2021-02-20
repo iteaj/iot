@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class AbstractProtocolTimeoutManager implements InitializingBean, DisposableBean {
 
-    //延迟多久执行一次
+    // 总共还有多少条数据未处理
     private long totalSize = 0;
     private Executor executor;
     private List<ProtocolTimeoutStorage> timeoutStorages;
@@ -78,7 +78,7 @@ public abstract class AbstractProtocolTimeoutManager implements InitializingBean
                     } else if(AbstractProtocolTimeoutManager.this.totalSize < 5000) {
                         Thread.sleep(800);
                     } else if(AbstractProtocolTimeoutManager.this.totalSize < 10000) {
-                        Thread.sleep(300);
+                        Thread.sleep(500);
                     }
 
                     if(logger.isTraceEnabled()) {
