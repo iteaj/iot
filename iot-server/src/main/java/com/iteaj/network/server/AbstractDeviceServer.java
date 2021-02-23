@@ -2,6 +2,7 @@ package com.iteaj.network.server;
 
 import com.iteaj.network.ProtocolException;
 import com.iteaj.network.config.DeviceProperties;
+import io.netty.bootstrap.AbstractBootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -28,31 +29,6 @@ public abstract class AbstractDeviceServer implements IotDeviceServer {
     }
 
     @Override
-    public void doBind(ServerBootstrap sb, ApplicationContext context) {
-        // 绑定此设备要开启的端口
-        sb.bind(this.port()).addListener(future -> {
-            if(future.isSuccess()) {
-                LOGGER.info("监听端口成功: {} - 设备: {} - 对应组件:{} - 说明: {}"
-                        , this.port(), name(), this.getClass().getSimpleName(), desc());
-            } else {
-                LOGGER.error("开启端口失败: {} - 设备: {} - 对应组件:{} - 说明: {} - 失败原因: {}", this.port(), name()
-                        , this.getClass().getSimpleName(), desc(), future.cause().getMessage(), future.cause());
-
-                bindPortFailHandle((ChannelFuture)future, (ConfigurableApplicationContext) context);
-            }
-        });
-    }
-
-    protected void bindPortFailHandle(ChannelFuture future, ConfigurableApplicationContext context) {
-        Throwable cause = future.cause();
-        LOGGER.warn("开启端口失败: {}, 将关闭Spring Application", this.port(), cause);
-        if(context.isActive()) {
-            context.close();
-            LOGGER.warn("关闭Spring Application: {} - 状态: 关闭完成", context.getApplicationName());
-        }
-    }
-
-    @Override
     public int port() {
         return this.port;
     }
@@ -62,7 +38,6 @@ public abstract class AbstractDeviceServer implements IotDeviceServer {
      * @param ch
      * @return
      */
-    @Override
     public boolean isMatcher(SocketChannel ch, int port) {
         return port == port();
     }

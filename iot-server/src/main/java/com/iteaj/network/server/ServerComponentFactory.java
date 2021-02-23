@@ -1,54 +1,77 @@
 package com.iteaj.network.server;
 
 import com.iteaj.network.AbstractMessage;
-import org.springframework.beans.factory.BeanInitializationException;
-import org.springframework.beans.factory.InitializingBean;
+import com.iteaj.network.FrameworkComponent;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ServerComponentFactory implements InitializingBean {
+public class ServerComponentFactory implements InitializingBean, BeanFactoryAware {
 
-    @Autowired
-    private List<DeviceServerComponent> serverComponents;
-    private Map<Integer, DeviceServerComponent> componentMap = new HashMap<>(8);
-    private Map<Class<? extends AbstractMessage>, DeviceServerComponent> messageComponentMap = new HashMap(8);
+    private BeanFactory beanFactory;
+    private List<DeviceServerComponent> serverComponents = new ArrayList<>();
+    private List<DeviceUdpServerComponent> udpServerComponents = new ArrayList<>();
+    private Map<Integer, ServerComponent> componentMap = new HashMap<>(8);
+    private Map<Class<? extends AbstractMessage>, ServerComponent> messageComponentMap = new HashMap(8);
 
     public List<DeviceServerComponent> getServerComponents() {
         return this.serverComponents;
     }
 
-    public DeviceServerComponent getByPort(Integer port) {
+    public List<DeviceUdpServerComponent> getUdpServerComponents() {
+        return this.udpServerComponents;
+    }
+
+    public ServerComponent getByPort(Integer port) {
         return componentMap.get(port);
     }
 
-    public DeviceServerComponent getByClass(Class<? extends AbstractMessage> messageClass) {
+    public ServerComponent getByClass(Class<? extends AbstractMessage> messageClass) {
         return messageComponentMap.get(messageClass);
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        if(CollectionUtils.isEmpty(serverComponents))
-            throw new BeanInitializationException("至少启用一个服务端组件来进行端口监听: " + DeviceServerComponent.class);
+        final ObjectProvider<ServerComponent> beanProvider = this.beanFactory.getBeanProvider(ServerComponent.class);
 
-        for(int i=0; i<serverComponents.size(); i++) {
-            DeviceServerComponent serverComponent = serverComponents.get(i);
-            int port = serverComponent.deviceServer().port();
-            if(port <= 0 || port > 65535)
-                throw new BeanInitializationException("服务端组件: " + serverComponent.deviceServer().name() + "使用错误的端口: " + port);
-
-            // 已经有组件使用此端口, 抛出异常
-            DeviceServerComponent component = componentMap.get(port);
-            if(component != null) {
-                throw new BeanInitializationException(serverComponent.deviceServer().name()
-                        + "和" + component.deviceServer().name() + "使用同一个端口: " + component.deviceServer().port());
+        beanProvider.stream().forEach(component -> {
+            IotDeviceServer deviceServer = component.deviceServer();
+            if(null == deviceServer) {
+                throw new IllegalArgumentException("未指定设备服务对象: DeviceServerComponent.deviceServer()");
             }
 
-            componentMap.put(port, serverComponent);
-            messageComponentMap.put(serverComponent.messageClass(), serverComponent);
-        }
+            if(component instanceof DeviceServerComponent) {
+                serverComponents.add((DeviceServerComponent) component);
+            }
+
+            if(component instanceof DeviceUdpServerComponent) {
+                udpServerComponents.add((DeviceUdpServerComponent) component);
+            }
+
+            int port = deviceServer.port();
+            if(port <= 0 || port > 65535)
+                throw new BeanInitializationException("服务端组件: " + deviceServer.name() + "使用错误的端口: " + port);
+
+            // 已经有组件使用此端口, 抛出异常
+            final ServerComponent serverComponent = componentMap.get(port);
+            if(serverComponent != null) {
+                throw new BeanInitializationException(serverComponent.deviceServer().name()
+                        + "和" + deviceServer.name() + "使用同一个端口: " + deviceServer.port());
+            }
+
+            componentMap.put(port, component);
+            messageComponentMap.put(component.messageClass(), component);
+        });
+    }
+
+    @Override
+    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+        this.beanFactory = beanFactory;
     }
 }

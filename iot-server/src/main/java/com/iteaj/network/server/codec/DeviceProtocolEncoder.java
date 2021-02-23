@@ -42,7 +42,7 @@ public class DeviceProtocolEncoder extends MessageToMessageEncoder<AbstractProto
 
                 //如果需要保存映射关系,用relationKey作为关联映射
                 if(protocol.isRelation() && requestMessage != null){
-                    DeviceServerComponent serverComponent = componentFactory.getByClass(requestMessage.getClass());
+                    DeviceServerComponent serverComponent = (DeviceServerComponent) componentFactory.getByClass(requestMessage.getClass());
                     serverComponent.protocolTimeoutStorage().add((String)protocol.relationKey()
                             , protocol, ((PlatformRequestProtocol) protocol).getTimeout());
                 }

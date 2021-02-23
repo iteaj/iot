@@ -7,6 +7,7 @@ import com.iteaj.network.event.DeviceEventType;
 import com.iteaj.network.event.ExceptionEvent;
 import com.iteaj.network.message.UnParseBodyMessage;
 import com.iteaj.network.server.DeviceServerComponent;
+import com.iteaj.network.server.ServerComponent;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
@@ -33,10 +34,10 @@ public class EventManagerHandler extends SimpleChannelInboundHandler<UnParseBody
     /**用来存放当前{@link io.netty.channel.Channel}对应的设备的设备号*/
     private String equipCode;
     private static DeviceManager deviceManager; //设备管理器
-    private DeviceServerComponent serverComponent; // 此事件管理器管理哪个服务端设备
+    private ServerComponent serverComponent; // 此事件管理器管理哪个服务端设备
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    public EventManagerHandler(DeviceManager deviceManager, DeviceServerComponent serverComponent) {
+    public EventManagerHandler(DeviceManager deviceManager, ServerComponent serverComponent) {
         this.deviceManager = deviceManager;
         this.serverComponent = serverComponent;
     }
