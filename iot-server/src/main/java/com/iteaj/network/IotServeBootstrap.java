@@ -29,6 +29,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
@@ -218,7 +219,7 @@ public class IotServeBootstrap implements InitializingBean,DisposableBean
         return BEAN_FACTORY.getBean(requiredClass);
     }
 
-    public static FrameworkComponent getServerComponent(Class<? extends AbstractMessage> messageClass) {
+    public static ServerComponent getServerComponent(Class<? extends AbstractMessage> messageClass) {
         return COMPONENT_FACTORY.getByClass(messageClass);
     }
 
@@ -268,8 +269,9 @@ public class IotServeBootstrap implements InitializingBean,DisposableBean
      * @return
      */
     @Bean
-    public AppClientServerComponent clientServerComponent() {
-        return new AppClientServerComponent();
+    @ConditionalOnExpression("!${iot.server.app.port:'0'}.equals('0')")
+    public AppClientServerComponent clientServerComponent(IotServerProperties properties) {
+        return new AppClientServerComponent(properties.getApp());
     }
 
     /**
@@ -306,7 +308,7 @@ public class IotServeBootstrap implements InitializingBean,DisposableBean
                 logger.warn("Spring ApplicationContext成功关闭");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("关闭应用时错误", e);
         }
     }
 

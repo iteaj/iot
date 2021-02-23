@@ -10,8 +10,7 @@ import org.slf4j.LoggerFactory;
  * @author iteaj
  * @since 1.7
  */
-public abstract class ProtocolFactory<T extends AbstractMessage>
-        implements StorageManager<String, Protocol>{
+public abstract class ProtocolFactory<T extends AbstractMessage> implements DeviceProtocolFactory<T>{
 
     /*报文管理器*/
     private ProtocolTimeoutStorage delegation;
@@ -22,13 +21,6 @@ public abstract class ProtocolFactory<T extends AbstractMessage>
     public ProtocolFactory(ProtocolTimeoutStorage delegation) {
         this.delegation = delegation;
     }
-
-    /**
-     * 获取协议
-     * @param message
-     * @return
-     */
-    public abstract AbstractProtocol getProtocol(T message);
 
     @Override
     public AbstractProtocol get(String key) {

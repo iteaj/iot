@@ -2,6 +2,7 @@ package com.iteaj.network.server;
 
 import com.iteaj.network.AbstractMessage;
 import com.iteaj.network.FrameworkComponent;
+import com.iteaj.network.ProtocolException;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 用来存储和获取设备组件{@link ServerComponent}
+ * @see #getByPort(Integer) 通过端口获取
+ * @see #getByClass(Class) 通过报文类型{@link AbstractMessage}获取
+ * @see #getServerComponents() 获取TCP端口的设备组件列表
+ * @see #getUdpServerComponents() 获取UDP端口的设备组件列表
+ */
 public class ServerComponentFactory implements InitializingBean, BeanFactoryAware {
 
     private BeanFactory beanFactory;
@@ -65,8 +73,15 @@ public class ServerComponentFactory implements InitializingBean, BeanFactoryAwar
                         + "和" + deviceServer.name() + "使用同一个端口: " + deviceServer.port());
             }
 
+            // 每种设备组件的报文类型不能为空, 且不能和其他的设备组件的报文类型不能同一类型
+            Class<? extends AbstractMessage> messageClass = component.messageClass();
+            if(messageClass == null) {
+                throw new BeanInitializationException("请指定组件的报文类型<M>："
+                        + component.getClass().getSimpleName()+"<M>");
+            }
+
             componentMap.put(port, component);
-            messageComponentMap.put(component.messageClass(), component);
+            messageComponentMap.put(messageClass, component);
         });
     }
 

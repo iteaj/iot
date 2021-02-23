@@ -60,9 +60,4 @@ public abstract class AbstractDeviceServer implements IotDeviceServer {
         }
     }
 
-    /**
-     * 返回设备解码器
-     * @return
-     */
-    protected abstract ChannelInboundHandlerAdapter getMessageDecoder();
 }

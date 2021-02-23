@@ -10,7 +10,7 @@
 
     <packaging>jar</packaging>
     <modelVersion>4.0.0</modelVersion>
-    <description>设备通讯服务端模块</description>
+    <description>Iot设备通讯服务端模块</description>
 
     <artifactId>iot-server</artifactId>
     <dependencies>

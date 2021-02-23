@@ -65,5 +65,11 @@ public interface IotDeviceServer {
      */
     void initChannelPipeline(ChannelPipeline pipeline);
 
+    /**
+     * 返回设备解码器
+     * @return
+     */
+    ChannelInboundHandlerAdapter getMessageDecoder();
+
     Logger LOGGER = LoggerFactory.getLogger(IotDeviceServer.class);
 }

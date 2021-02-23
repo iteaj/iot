@@ -18,7 +18,7 @@ public class ClientMessage extends UnParseBodyMessage {
 
     @Override
     public UnParseBodyMessage build() throws IOException {
-        throw new UnsupportedOperationException("客户端报文不支持构建");
+        return this;
     }
 
     public ClientMessage(String deviceSn, byte[] message) {

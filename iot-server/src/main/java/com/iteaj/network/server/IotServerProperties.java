@@ -1,5 +1,6 @@
 package com.iteaj.network.server;
 
+import com.iteaj.network.config.DeviceProperties;
 import io.netty.handler.logging.LogLevel;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -19,6 +20,11 @@ public class IotServerProperties {
     private int clientPort = 8088;
 
     /**
+     * 应用程序客户端配置信息
+     */
+    private AppProperties app;
+
+    /**
      * netty Selector boss组线程数量
      */
     private short bossThreadNum = 2;
@@ -27,6 +33,7 @@ public class IotServerProperties {
      * netty 工作组线程数量
      */
     private short workerThreadNum = 5;
+
     public int getClientPort() {
         return clientPort;
     }
@@ -57,5 +64,21 @@ public class IotServerProperties {
 
     public void setLevel(LogLevel level) {
         this.level = level;
+    }
+
+    public AppProperties getApp() {
+        return app;
+    }
+
+    public IotServerProperties setApp(AppProperties app) {
+        this.app = app;
+        return this;
+    }
+
+    public static class AppProperties extends DeviceProperties {
+
+        public AppProperties() {
+            super(8088);
+        }
     }
 }

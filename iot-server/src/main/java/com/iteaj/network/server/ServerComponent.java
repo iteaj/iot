@@ -1,16 +1,16 @@
 package com.iteaj.network.server;
 
-import com.iteaj.network.AbstractMessage;
-import com.iteaj.network.FrameworkComponent;
-import com.iteaj.network.ProtocolFactory;
-import com.iteaj.network.ProtocolTimeoutStorage;
+import com.iteaj.network.*;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.InitializingBean;
 
+/**
+ * 用来封装需要监听在TCP端口的设备的所需要的服务端组件
+ */
 public abstract class ServerComponent implements FrameworkComponent, InitializingBean {
 
     private IotDeviceServer iotDeviceServer;
-    private ProtocolFactory protocolFactory;
+    private DeviceProtocolFactory protocolFactory;
     private ProtocolTimeoutStorage protocolTimeoutManager;
 
 
@@ -40,7 +40,7 @@ public abstract class ServerComponent implements FrameworkComponent, Initializin
      * 创建协议工厂
      * @return
      */
-    public final ProtocolFactory protocolFactory() {
+    public final DeviceProtocolFactory protocolFactory() {
         if(this.protocolFactory != null) {
             return this.protocolFactory;
         }
@@ -50,14 +50,17 @@ public abstract class ServerComponent implements FrameworkComponent, Initializin
             throw new BeanInitializationException("组件["+getClass().getSimpleName()+"]未创建协议工厂实例["+ProtocolFactory.class.getSimpleName()+"]");
         }
 
-        if(this.protocolFactory.getDelegation() == null) {
-            this.protocolFactory.setDelegation(protocolTimeoutStorage());
+        if(this.protocolFactory instanceof ProtocolFactory) {
+            ProtocolFactory protocolFactory = (ProtocolFactory) this.protocolFactory;
+            if (protocolFactory.getDelegation() == null) {
+                protocolFactory.setDelegation(protocolTimeoutStorage());
+            }
         }
 
         return this.protocolFactory;
     }
 
-    protected abstract ProtocolFactory createProtocolFactory();
+    protected abstract DeviceProtocolFactory createProtocolFactory();
 
     /**
      * 设备服务端使用的报文类
