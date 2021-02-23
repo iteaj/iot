@@ -1,11 +1,15 @@
 package com.iteaj.network.server;
 
+import io.netty.bootstrap.AbstractBootstrap;
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * 设备服务端, 一款设备一般对应一个服务端口, 支持多设备接入
@@ -34,17 +38,29 @@ public interface IotDeviceServer {
      * 开启监听端口并且绑定
      * @param sb
      */
-    void doBind(ServerBootstrap sb, ApplicationContext context);
+    default void doBind(AbstractBootstrap sb, ApplicationContext context) {
+        // 绑定此设备要开启的端口
+        sb.bind(this.port()).addListener(future -> {
+            if(future.isSuccess()) {
+                LOGGER.info("监听端口成功: {} - 设备: {} - 对应组件:{} - 说明: {}"
+                        , this.port(), name(), this.getClass().getSimpleName(), desc());
+            } else {
+                LOGGER.error("开启端口失败: {} - 设备: {} - 对应组件:{} - 说明: {} - 失败原因: {}", this.port(), name()
+                        , this.getClass().getSimpleName(), desc(), future.cause().getMessage(), future.cause());
+
+                Throwable cause = future.cause();
+                if(context instanceof ConfigurableApplicationContext) {
+                    LOGGER.warn("开启端口失败: {}, 将关闭Spring Application", this.port(), cause);
+                    if(((ConfigurableApplicationContext) context).isActive()) {
+                        ((ConfigurableApplicationContext) context).close();
+                        LOGGER.warn("关闭Spring Application: {} - 状态: 关闭完成", context.getApplicationName());
+                    }
+                }
+            }
+        });
+    }
 
     /**
-     * 当前链接的Channel是否匹配此设备服务端
-     * @param ch
-     * @return
-     */
-    boolean isMatcher(SocketChannel ch, int port);
-
-    /**
-     * @see #isMatcher(SocketChannel, int) 如果返回true 将调用此方法进行channel初始化
      * @param pipeline
      */
     void initChannelPipeline(ChannelPipeline pipeline);

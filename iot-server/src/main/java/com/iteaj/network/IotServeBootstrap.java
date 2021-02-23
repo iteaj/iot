@@ -8,10 +8,13 @@ import com.iteaj.network.server.codec.DeviceProtocolEncoder;
 import com.iteaj.network.server.handle.EventManagerHandler;
 import com.iteaj.network.server.handle.ProtocolBusinessHandler;
 import com.iteaj.network.server.manager.DevicePipelineManager;
+import io.netty.bootstrap.AbstractBootstrap;
+import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContext;
@@ -33,8 +36,10 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.util.CollectionUtils;
 
 import javax.net.ssl.SSLException;
+import java.net.InetSocketAddress;
 import java.security.cert.CertificateException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -60,7 +65,9 @@ public class IotServeBootstrap implements InitializingBean,DisposableBean
     private EventLoopGroup workerGroup;
     @Autowired
     private DeviceManager deviceManager;
-    private ServerBootstrap serverBootstrap;
+
+    private Bootstrap udpBootstrap;
+    private ServerBootstrap tcpBootstrap;
 
     @Autowired
     public DeviceProtocolEncoder protocolEncoder;
@@ -115,25 +122,13 @@ public class IotServeBootstrap implements InitializingBean,DisposableBean
             // Netty框架配置
             bossGroup = new NioEventLoopGroup(properties.getBossThreadNum(), new DefaultThreadFactory("IotSelector"));
             workerGroup = new NioEventLoopGroup(properties.getWorkerThreadNum(), new DefaultThreadFactory("IotWorker"));
-            serverBootstrap = new ServerBootstrap();
-            serverBootstrap.group(bossGroup, workerGroup)
-                    .channel(NioServerSocketChannel.class)
-                    .option(ChannelOption.SO_BACKLOG, 128)
-                    .childOption(ChannelOption.SO_KEEPALIVE, true)
-                    .handler(new LoggingHandler(properties.getLevel()))
-                    .childHandler(new ChannelInitializer<SocketChannel>() {
-                        @Override
-                        public void initChannel(SocketChannel ch) throws Exception {
-                            ChannelPipeline p = ch.pipeline();
-                            if (sslCtx != null) {
-                                p.addLast(sslCtx.newHandler(ch.alloc()));
-                            }
 
-                            int port = ch.localAddress().getPort();
-                            IotServeBootstrap.this.doChannelInitializer(ch, p, port);
-                        }
+            // 初始化tcp服务
+            final List<DeviceServerComponent> serverComponents = COMPONENT_FACTORY.getServerComponents();
+            if(!CollectionUtils.isEmpty(serverComponents)) {
+                initTcpServe(sslCtx);
+            }
 
-                    });
         } catch (CertificateException e) {
             logger.error("Nio服务端Ssl证书异常：", e);
         } catch (SSLException e) {
@@ -145,9 +140,29 @@ public class IotServeBootstrap implements InitializingBean,DisposableBean
         return this;
     }
 
-    protected void doChannelInitializer(SocketChannel ch, ChannelPipeline p, int port) {
-        DeviceServerComponent serverComponent = COMPONENT_FACTORY.getByPort(port);
-        if(serverComponent != null) {
+    protected void initTcpServe(SslContext sslCtx) {
+        tcpBootstrap = new ServerBootstrap().group(bossGroup, workerGroup)
+                .channel(NioServerSocketChannel.class)
+                .option(ChannelOption.SO_BACKLOG, 128)
+                .childOption(ChannelOption.SO_KEEPALIVE, true)
+                .handler(new LoggingHandler(properties.getLevel()))
+                .childHandler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    public void initChannel(SocketChannel ch) throws Exception {
+                        ChannelPipeline p = ch.pipeline();
+                        if (sslCtx != null) {
+                            p.addLast(sslCtx.newHandler(ch.alloc()));
+                        }
+
+                        int port = ch.localAddress().getPort();
+                        IotServeBootstrap.this.doSocketChannelInitializer(ch, p, port);
+                    }
+                });
+    }
+
+    protected void doSocketChannelInitializer(SocketChannel ch, ChannelPipeline p, int port) {
+        ServerComponent serverComponent = COMPONENT_FACTORY.getByPort(port);
+        if(serverComponent instanceof DeviceServerComponent) {
             IotDeviceServer iotDeviceServer = serverComponent.deviceServer();
             if(iotDeviceServer instanceof BeanFactoryAware) {
                 ((BeanFactoryAware) iotDeviceServer).setBeanFactory(BEAN_FACTORY);
@@ -170,8 +185,29 @@ public class IotServeBootstrap implements InitializingBean,DisposableBean
     }
 
     protected void doBind(final ApplicationContext context){
-        // 开启端口监听
-        COMPONENT_FACTORY.getServerComponents().forEach(item -> item.deviceServer().doBind(serverBootstrap, context));
+        // 监听TCP端口
+        COMPONENT_FACTORY.getServerComponents().forEach(item -> item.deviceServer().doBind(tcpBootstrap, context));
+
+        // 监听UDP端口
+        COMPONENT_FACTORY.getUdpServerComponents().forEach(item -> item.deviceServer().doBind(getUdpBootstrap(item), context));
+    }
+
+    private AbstractBootstrap getUdpBootstrap(DeviceUdpServerComponent component) {
+        return new Bootstrap().group(workerGroup)
+                .channel(NioDatagramChannel.class)
+                // 设置读缓冲区为2M
+                .option(ChannelOption.SO_RCVBUF, 1024 * 1024)
+                // 设置写缓冲区为1M
+                .option(ChannelOption.SO_SNDBUF, 1024 * 1024)
+//                .option(EpollChannelOption.SO_REUSEPORT, true)
+                .option(ChannelOption.SO_BROADCAST, true)
+                .handler(new ChannelInitializer<NioDatagramChannel>() {
+                    @Override
+                    protected void initChannel(NioDatagramChannel ch) throws Exception {
+                        component.deviceServer().initChannelPipeline(ch.pipeline());
+                        ch.pipeline().addLast("protocolHandle", new ProtocolBusinessHandler(COMPONENT_FACTORY, BUSINESS_FACTORY));
+                    }
+                });
     }
 
     public static void publishApplicationEvent(ApplicationEvent event) {
@@ -182,7 +218,7 @@ public class IotServeBootstrap implements InitializingBean,DisposableBean
         return BEAN_FACTORY.getBean(requiredClass);
     }
 
-    public static DeviceServerComponent getServerComponent(Class<? extends AbstractMessage> messageClass) {
+    public static FrameworkComponent getServerComponent(Class<? extends AbstractMessage> messageClass) {
         return COMPONENT_FACTORY.getByClass(messageClass);
     }
 
@@ -244,7 +280,10 @@ public class IotServeBootstrap implements InitializingBean,DisposableBean
     @Bean
     public ServerTimeoutProtocolManager serverTimeoutProtocolManager(ServerComponentFactory componentFactory) {
         List<ProtocolTimeoutStorage> storages = componentFactory.getServerComponents()
-                .stream().map(item -> item.protocolTimeoutStorage()).collect(Collectors.toList());
+                .stream()
+                .filter(item->item.protocolTimeoutStorage() != null)
+                .map(item -> item.protocolTimeoutStorage())
+                .collect(Collectors.toList());
 
         return new ServerTimeoutProtocolManager(storages);
     }

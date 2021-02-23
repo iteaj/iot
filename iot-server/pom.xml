@@ -5,7 +5,7 @@
     <parent>
         <artifactId>iot</artifactId>
         <groupId>com.iteaj</groupId>
-        <version>1.0.1</version>
+        <version>1.0.2</version>
     </parent>
 
     <packaging>jar</packaging>

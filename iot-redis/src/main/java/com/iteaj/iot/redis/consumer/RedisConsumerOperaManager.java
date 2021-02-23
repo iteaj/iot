@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
 public class RedisConsumerOperaManager implements InitializingBean, DisposableBean {
@@ -103,8 +104,20 @@ public class RedisConsumerOperaManager implements InitializingBean, DisposableBe
 
     @Override
     public void destroy() throws Exception {
-        blockExecutorService.shutdown();
-        consumerExecutorService.shutdown();
+        if(blockExecutorService != null) {
+            blockExecutorService.shutdownNow();
+            logger.error("关闭Redis阻塞队列线程池成功");
+        }
+
+        if(!consumerExecutorService.isShutdown()) {
+            consumerExecutorService.shutdownNow();
+            logger.error("关闭Redis消费任务算法执行器成功");
+        }
+
+        final ThreadPoolExecutor poolExecutor = executor.getThreadPoolExecutor();
+        if(!poolExecutor.isShutdown()) {
+            executor.destroy();
+        }
     }
 
     /**

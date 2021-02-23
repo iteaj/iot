@@ -3,6 +3,7 @@ package com.iteaj.iot.client.handle;
 import com.iteaj.iot.client.ClientComponent;
 import com.iteaj.iot.client.ClientRequestProtocol;
 import com.iteaj.network.Protocol;
+import com.iteaj.network.ProtocolFactory;
 import com.iteaj.network.client.AbstractClientProtocol;
 import com.iteaj.network.client.ClientMessage;
 import io.netty.channel.ChannelHandlerContext;
@@ -33,8 +34,14 @@ public class ClientProtocolHandle extends SimpleChannelInboundHandler<ClientMess
             return;
         }
 
-        Protocol protocol = clientComponent.protocolFactory().getProtocol(msg);
+        final ProtocolFactory protocolFactory = clientComponent.protocolFactory();
+        if(protocolFactory == null) {
+            logger.error("协议工厂不存在 组件名称: {} - 组件类型: {}", clientComponent.name()
+                    , clientComponent.getClass().getSimpleName());
+            return;
+        }
 
+        Protocol protocol = protocolFactory.getProtocol(msg);
         if(protocol == null) {
             logger.warn("找不到协议({}) messageId: {} - 设备编号: {} - 报文: {}", clientComponent.name(),messageId, msg.getDeviceSn(), msg);
             return;

@@ -6,6 +6,7 @@ import com.iteaj.network.business.BusinessFactory;
 import com.iteaj.network.client.AppClientServerProtocol;
 import com.iteaj.network.message.UnParseBodyMessage;
 import com.iteaj.network.server.DeviceServerComponent;
+import com.iteaj.network.server.ServerComponent;
 import com.iteaj.network.server.ServerComponentFactory;
 import com.iteaj.network.server.protocol.DeviceRequestProtocol;
 import com.iteaj.network.server.protocol.NoneDealProtocol;
@@ -42,7 +43,7 @@ public class ProtocolBusinessHandler extends SimpleChannelInboundHandler<UnParse
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, UnParseBodyMessage msg) throws Exception {
 
-        DeviceServerComponent serverComponent = componentFactory.getByClass(msg.getClass());
+        ServerComponent serverComponent = componentFactory.getByClass(msg.getClass());
         if(serverComponent == null) {
             logger.error("没有与报文类型: {} 对应的服务组件", msg.getClass());
             return;

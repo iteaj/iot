@@ -13,7 +13,7 @@
     <packaging>pom</packaging>
     <groupId>com.iteaj</groupId>
     <artifactId>iot</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <url>https://github.com/iteaj/iot.git</url>
 
     <description>基于Netty和Spring Boot的网络通讯框架(物联网)</description>
