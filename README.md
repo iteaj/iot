@@ -1,5 +1,5 @@
 #### iot
-基于netty, spring boot, redis等开源项目开发来的物联网框架, 支持udp, tcp, http底层协议和mqtt, modbus等上层协议. 支持对设备同步和异步的调用操作
+基于netty, spring boot, redis等开源项目开发来的物联网框架, 支持udp, tcp底层协议和http, mqtt, modbus等上层协议. 支持对设备同步和异步的调用操作. 主要向开发人员开放了一套统一、简单的用于操作设备的Api接口
 #### 1. 主要功能
 1. 支持监听多个端口, 对接多种设备类型
 2. 拥有一个设备库, 此库已经对接好多种设备
