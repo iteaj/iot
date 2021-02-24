@@ -9,6 +9,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 
+import java.util.List;
+
 /**
  * create time: 2021/2/22
  *  适配{@link DelimiterBasedFrameDecoder}解码器到服务组件{@link DeviceServerComponent}
@@ -38,6 +40,12 @@ public abstract class DelimiterBasedFrameDecoderComponentAdapter<M extends UnPar
     @Override
     public ChannelInboundHandlerAdapter getMessageDecoder() {
         return this.decoderWrapper;
+    }
+
+
+    @Override
+    public List<M> decodes(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
+        throw new UnsupportedOperationException("不支持此方法, 请使用方法：DeviceMessageDecoder.decode(ctx, in)");
     }
 
     protected class DelimiterBasedFrameDecoderWrapper extends DelimiterBasedFrameDecoder {
@@ -70,7 +78,9 @@ public abstract class DelimiterBasedFrameDecoderComponentAdapter<M extends UnPar
         protected Object decode(ChannelHandlerContext ctx, ByteBuf buffer) throws Exception {
             Object decode = super.decode(ctx, buffer);
             if(decode instanceof ByteBuf) {
-                return DelimiterBasedFrameDecoderComponentAdapter.this.decode(ctx, (ByteBuf) decode);
+                M message = DelimiterBasedFrameDecoderComponentAdapter.this.decode(ctx, (ByteBuf) decode);
+
+                return message != null ? message.build() : decode;
             } else {
                 return decode;
             }

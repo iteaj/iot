@@ -35,9 +35,9 @@ public abstract class ByteToMessageDecoderComponentAdapter<M extends UnParseBody
 
         @Override
         protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-            M decode = ByteToMessageDecoderComponentAdapter.this.decode(ctx, in);
-            if(decode != null) {
-                out.add(decode.build());
+            List<M> decodes = ByteToMessageDecoderComponentAdapter.this.decodes(ctx, in);
+            if(decodes != null) {
+                out.addAll(decodes);
             }
         }
     }
