@@ -8,15 +8,17 @@ package com.iteaj.network.message;
  */
 public class VoidMessageBody extends DeviceMessageBody {
 
+    private static VoidMessageBody instance = new VoidMessageBody();
+
     public VoidMessageBody() {
-        this(null, 0);
+        this(new byte[0]);
     }
 
-    public VoidMessageBody(byte[] messageBody) {
-        super(messageBody);
+    public VoidMessageBody(byte[] message) {
+        super(message);
     }
 
-    public VoidMessageBody(byte[] messageBody, int length) {
-        super(messageBody, length);
+    public static VoidMessageBody getInstance() {
+        return instance;
     }
 }
