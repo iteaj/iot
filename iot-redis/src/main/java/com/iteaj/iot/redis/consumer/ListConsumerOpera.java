@@ -32,11 +32,17 @@ public class ListConsumerOpera implements BlockConsumerOpera {
     }
 
     @Override
-    public List deserialize(List<JSONObject> value, Class clazz) {
+    public List deserialize(List<?> value, Class clazz) {
         if(CollectionUtils.isEmpty(value)) {
             return null;
         } else {
-            return (List)value.stream().map(item -> item.toJavaObject(clazz)).collect(Collectors.toList());
+            return (List) value.stream().map(item -> {
+                if(item instanceof JSONObject) {
+                    return ((JSONObject) item).toJavaObject(clazz);
+                } else {
+                    return item;
+                }
+            }).collect(Collectors.toList());
         }
     }
 

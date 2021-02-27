@@ -99,7 +99,6 @@ public class RedisConsumerOperaManager implements InitializingBean, DisposableBe
             });
         }
 
-
     }
 
     @Override
@@ -150,7 +149,7 @@ public class RedisConsumerOperaManager implements InitializingBean, DisposableBe
 
                         // 如果没有返回消费成功的数据, 那么将读取的长度作为消费成功的长度进行移除
                         consumerNum = consumerNum == null ? list.size() : consumerNum;
-                        if(consumerNum != 0) {
+                        if(consumerNum > 0) {
                             consumerOpera.remove(consumer.getKey(), consumerNum);
                         }
                     }
@@ -173,19 +172,26 @@ public class RedisConsumerOperaManager implements InitializingBean, DisposableBe
         public void run() {
             for (;;) {
                 try {
-                    Iterator<RedisConsumerWrapper> iterator = execConsumers.iterator();
+                    int notFinishCount = 0; // 未消费完成的数量
+                    for (RedisConsumerWrapper item : execConsumers) {
+                        if(item.isFinish()) { // 如消费完成, 继续消费
+                            item.setFinish(false); // 还未开始消费
 
-                    while (iterator.hasNext()) {
-                        RedisConsumerWrapper next = iterator.next();
-                        iterator.remove(); // 从执行列表里面移除
-
-                        // 加入消费任务
-                        executor.execute(new ConsumerTask(next));
+                            // 加入消费任务队列
+                            executor.execute(new ConsumerTask(item));
+                        } else {
+                            notFinishCount ++;
+                        }
                     }
 
-                    // 执行列表没有可执行消费对象, 暂时休眠10秒
-                    if(execConsumers.size() == 0) {
-                        Thread.sleep(10 * 1000);
+                    // 如果全部未完成消费, 则消费处理任务休眠5秒, 让出此线程的时间片段
+                    if(notFinishCount == execConsumers.size()) {
+                        if(logger.isDebugEnabled()) {
+                            logger.debug("Redis消费算法 所有消费任务都未完成休眠5秒 - 为完成RedisConsumer对象: {} - 总RedisConsumer对象: {} - "
+                                    , notFinishCount, execConsumers.size());
+                        }
+
+                        Thread.sleep(5 * 1000);
                     }
                 } catch (Exception e) {
                     logger.error("Redis消费任务算法异常({})", e.getMessage(), e);
@@ -225,14 +231,15 @@ public class RedisConsumerOperaManager implements InitializingBean, DisposableBe
             } catch (Exception e) {
                 logger.error("Redis消费管理异常({}) - key: {} - 消费对象: {}", e.getMessage(), consumer.getKey(), consumer.getClass(), e);
             } finally {
-
-                // 此消费如果执行完重新加入执行列表
-                execConsumers.add(consumerWrapper);
+                this.consumerWrapper.setFinish(true); // 声明已经消费完成, 可以进行下一次消费任务
             }
         }
     }
 
     class RedisConsumerWrapper implements RedisConsumer {
+
+        // 此消费对象是否完成完成
+        private volatile boolean finish = true;
 
         // 值类型
         private Class<?> valueClazz;
@@ -271,6 +278,14 @@ public class RedisConsumerOperaManager implements InitializingBean, DisposableBe
 
         public Class<?> getValueClazz() {
             return valueClazz;
+        }
+
+        public boolean isFinish() {
+            return finish;
+        }
+
+        public void setFinish(boolean finish) {
+            this.finish = finish;
         }
     }
 
