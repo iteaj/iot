@@ -63,17 +63,17 @@ public abstract class DeviceServerDecoderComponent<M extends UnParseBodyMessage>
     }
 
     @Override
-    public Protocol get(String key) {
+    public AbstractProtocol get(String key) {
         return this.delegation.get(key);
     }
 
     @Override
-    public Protocol add(String key, Protocol val) {
+    public AbstractProtocol add(String key, Protocol val) {
         return this.delegation.add(key, val);
     }
 
     @Override
-    public Protocol remove(String key) {
+    public AbstractProtocol remove(String key) {
         return this.delegation.remove(key);
     }
 
@@ -99,17 +99,17 @@ public abstract class DeviceServerDecoderComponent<M extends UnParseBodyMessage>
 
         @Override
         public ChannelInboundHandlerAdapter getMessageDecoder() {
-            throw new UnsupportedOperationException("不支持的操作");
+            return DeviceServerDecoderComponent.this.getMessageDecoder();
         }
 
         @Override
         public String name() {
-            throw new UnsupportedOperationException("不支持的操作");
+            return DeviceServerDecoderComponent.this.name();
         }
 
         @Override
         public String desc() {
-            throw new UnsupportedOperationException("不支持的操作");
+            return DeviceServerDecoderComponent.this.desc();
         }
     }
 
@@ -117,7 +117,7 @@ public abstract class DeviceServerDecoderComponent<M extends UnParseBodyMessage>
 
         @Override
         public AbstractProtocol getProtocol(M message) {
-            return null;
+            return DeviceServerDecoderComponent.this.getProtocol(message);
         }
     }
 }

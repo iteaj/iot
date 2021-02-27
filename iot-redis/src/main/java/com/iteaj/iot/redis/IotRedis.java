@@ -12,7 +12,7 @@ public interface IotRedis {
     }
 
     /**
-     * @see IotRedisConfiguration#redisTemplate(RedisConnectionFactory) 初始化
+     * @see IotRedisConfiguration#jsonRedisTemplate(RedisConnectionFactory) 初始化
      */
     class RedisTemplateWrapper {
         public static RedisTemplate template;

@@ -10,27 +10,20 @@ import com.iteaj.network.Message;
  */
 public class DeviceMessageBody implements Message.MessageBody {
 
-    private int length;
-    private byte[] messageBody;
+    private byte[] message;
 
-    public DeviceMessageBody(byte[] messageBody) {
-        this(messageBody, messageBody.length);
-    }
-
-    public DeviceMessageBody(byte[] messageBody, int length) {
-        this.length = length;
-        this.messageBody = messageBody;
+    public DeviceMessageBody(byte[] message) {
+        this.message = message;
     }
 
     @Override
     public int getBodyLength() {
-        return length;
+        return message.length;
     }
 
     @Override
     public byte[] getBodyMessage() {
-        return messageBody;
+        return message;
     }
-
 
 }

@@ -6,18 +6,12 @@ import com.iteaj.iot.redis.producer.RedisProducer;
 import com.iteaj.network.ProtocolException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.data.redis.core.RedisTemplate;
 
 import java.lang.reflect.Method;
 
 public class ProtocolHandleProxy {
 
-    private RedisTemplate template;
-
     private static String BUSINESS_NAME = "business";
-    public ProtocolHandleProxy(RedisTemplate template) {
-        this.template = template;
-    }
 
     public Object createProxy(RedisProducer target) {
         ProxyFactory proxyFactory = new ProxyFactory();

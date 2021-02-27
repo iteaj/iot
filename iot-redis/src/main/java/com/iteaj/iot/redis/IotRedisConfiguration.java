@@ -8,7 +8,6 @@ import com.iteaj.iot.redis.consumer.RedisConsumerOperaManager;
 import com.iteaj.iot.redis.producer.RedisProducer;
 import com.iteaj.iot.redis.proxy.ProtocolHandleProxy;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -67,13 +66,12 @@ public class IotRedisConfiguration implements BeanPostProcessor {
     /**
      * 协议处理器代理
      * 如果需要使生产者生效, 必须对生产者对象进行代理
-     * @param redisTemplate
      * @return
      */
     @Bean
     @ConditionalOnProperty(prefix = "iot.redis", value = "producer", havingValue = "true")
-    public ProtocolHandleProxy protocolHandleProxy(RedisTemplate redisTemplate) {
-        return new ProtocolHandleProxy(redisTemplate);
+    public ProtocolHandleProxy protocolHandleProxy() {
+        return new ProtocolHandleProxy();
     }
 
     /**

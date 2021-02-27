@@ -19,7 +19,7 @@ public interface RedisConsumerOpera extends IotRedis {
      * @param clazz
      * @return
      */
-    List deserialize(List<JSONObject> value, Class clazz);
+    List deserialize(List<?> value, Class clazz);
 
     /**
      * 移除已经消费的列表元素

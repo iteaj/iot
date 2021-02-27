@@ -11,32 +11,17 @@ import com.iteaj.network.Message;
  */
 public class DeviceMessageHead implements Message.MessageHead {
 
-    private byte[] messageHead; //报文头数据
+    private byte[] message; //报文头数据
 
-    private String checkSum; //校验码
     private String messageId; //消息id
     private String equipCode; //设备号
     private Object tradeType; //协议类型
-//    private int totalDataLen; //数据总长度
 
-    public DeviceMessageHead(byte[] messageHead, String messageId, String equipCode, Object tradeType) {
-        this(messageHead, null, messageId, equipCode, tradeType);
-    }
-
-    public DeviceMessageHead(byte[] messageHead, String equipCode, Object tradeType) {
-        this(messageHead, null, equipCode, tradeType);
-    }
-
-    public DeviceMessageHead(byte[] messageHead, String checkSum, String messageId, String equipCode, Object tradeType) {
-        this.messageHead = messageHead;
-        this.checkSum = checkSum;
+    public DeviceMessageHead(byte[] message, String messageId, String equipCode, Object tradeType) {
+        this.message = message;
         this.messageId = messageId;
         this.equipCode = equipCode;
         this.tradeType = tradeType;
-    }
-
-    public byte[] getMessageHead() {
-        return messageHead;
     }
 
     @Override
@@ -70,14 +55,6 @@ public class DeviceMessageHead implements Message.MessageHead {
         return this;
     }
 
-    public String getCheckSum() {
-        return checkSum;
-    }
-
-    public void setCheckSum(String checkSum) {
-        this.checkSum = checkSum;
-    }
-
     /**
      * 校验码 以上所有BYTE的校验和
      * @return
@@ -86,11 +63,11 @@ public class DeviceMessageHead implements Message.MessageHead {
 
     @Override
     public int getHeadLength() {
-        return messageHead.length;
+        return message.length;
     }
 
     @Override
     public byte[] getHeadMessage() {
-        return messageHead;
+        return message;
     }
 }
