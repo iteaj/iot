@@ -12,6 +12,7 @@ import com.iteaj.network.server.protocol.DeviceRequestProtocol;
 import com.iteaj.network.server.protocol.NoneDealProtocol;
 import com.iteaj.network.server.protocol.PlatformRequestProtocol;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
@@ -23,6 +24,7 @@ import org.slf4j.LoggerFactory;
  * @author iteaj
  * @since 1.7
  */
+@ChannelHandler.Sharable
 public class ProtocolBusinessHandler extends SimpleChannelInboundHandler<UnParseBodyMessage> {
 
     private BusinessFactory businessFactory;//业务工厂

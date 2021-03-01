@@ -5,6 +5,7 @@ import com.iteaj.network.CoreConst;
 import com.iteaj.network.ProtocolException;
 import com.iteaj.network.client.ClientRelationEntity;
 import com.iteaj.network.consts.ExecStatus;
+import com.iteaj.network.utils.ByteUtil;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -13,9 +14,13 @@ public class AppClientUtil {
 
     public static String buildByteMessage(AppClientMessage message) {
         try {
-            String toJSONString = JSONObject.toJSONString(message) + CoreConst.DELIMITER;
+            String toJSONString = JSONObject.toJSONString(message);
+            byte[] bytes = toJSONString.getBytes("UTF-8");
 
-            message.setMessage(toJSONString.getBytes("UTF-8"));
+            byte[] messageBytes = new byte[4+bytes.length];
+            ByteUtil.addBytes(messageBytes, bytes, 4);
+            ByteUtil.addBytes(messageBytes, ByteUtil.intToBytesOfNegate(bytes.length), 0);
+            message.setMessage(messageBytes);
 
             return toJSONString;
         } catch (UnsupportedEncodingException e) {
@@ -37,7 +42,8 @@ public class AppClientUtil {
         appClientMessage.setDeviceSn(jsonMessage.getString("deviceSn"));
         JSONObject head = jsonMessage.getJSONObject("head");
         appClientMessage.setHead(new AppClientMessageHead(equipCode, jsonMessage
-                .getString("messageId"), head.getString("tradeType"), head.getLong("timeout")));
+                .getString("messageId"), head.getString("tradeType")
+                , head.getLong("timeout")));
 
         return appClientMessage;
     }
@@ -53,10 +59,12 @@ public class AppClientUtil {
 
             JSONObject head = jsonMessage.getJSONObject("head");
             appClientMessage.setHead(new AppClientMessageHead(head.getString("equipCode")
-                    , jsonMessage.getString("messageId"), head.getString("tradeType"), head.getLong("timeout")));
+                    , jsonMessage.getString("messageId"),
+                    head.getString("tradeType"), head.getLong("timeout")));
 
             JSONObject body = jsonMessage.getJSONObject("body");
-            appClientMessage.setBody(new AppClientResponseBody(body.getString("reason"), ExecStatus.getInstance(body.getString("status"))));
+            appClientMessage.setBody(new AppClientResponseBody(body
+                    .getString("reason"), ExecStatus.getInstance(body.getString("status"))));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -81,13 +89,10 @@ public class AppClientUtil {
      * @return
      */
     public static AppClientMessage<AppClientResponseBody> buildServerResponseMessage(AppClientMessageHead head, AppClientResponseBody body) {
-        AppClientMessage<AppClientResponseBody> responseMessage = new AppClientMessage<>(AppClientType.App_Client_Server, head, body).setType(RequestType.RES);
-        try {
-            String messageStr = JSONObject.toJSONString(responseMessage) + CoreConst.DELIMITER;
-            responseMessage.setMessage(messageStr.getBytes("UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+        AppClientMessage<AppClientResponseBody> responseMessage = new AppClientMessage<>
+                (AppClientType.App_Client_Server, head, body).setType(RequestType.RES);
+
+        buildByteMessage(responseMessage);
         return responseMessage;
     }
 

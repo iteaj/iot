@@ -40,7 +40,6 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.util.CollectionUtils;
 
 import javax.net.ssl.SSLException;
-import java.net.InetSocketAddress;
 import java.security.cert.CertificateException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -67,11 +66,12 @@ public class IotServeBootstrap implements InitializingBean,DisposableBean
     @Autowired
     private DeviceManager deviceManager;
 
-    private Bootstrap udpBootstrap;
     private ServerBootstrap tcpBootstrap;
 
     @Autowired
     public DeviceProtocolEncoder protocolEncoder;
+    @Autowired
+    private ProtocolBusinessHandler protocolHandler;
 
     public static ServerProtocolHandleFactory BUSINESS_FACTORY;
     private static ServerComponentFactory COMPONENT_FACTORY;
@@ -179,7 +179,7 @@ public class IotServeBootstrap implements InitializingBean,DisposableBean
             }
 
             p.addFirst("encode", protocolEncoder); // 设备协议编码通用
-            p.addLast("protocolHandle", new ProtocolBusinessHandler(COMPONENT_FACTORY, BUSINESS_FACTORY));
+            p.addLast("protocolHandle", protocolHandler);
         } else {
             logger.error("查无与端口: {}匹配的服务组件: {}, 所有与此端口连接的设备都无法处理", port, DeviceServerComponent.class.getSimpleName());
         }
@@ -240,6 +240,12 @@ public class IotServeBootstrap implements InitializingBean,DisposableBean
     @Bean({"deviceManager"})
     public DevicePipelineManager devicePipelineManager() {
         return DevicePipelineManager.getInstance();
+    }
+
+    @Bean
+    public ProtocolBusinessHandler businessHandler(ServerComponentFactory componentFactory
+            , ServerProtocolHandleFactory handleFactory) {
+        return new ProtocolBusinessHandler(componentFactory, handleFactory);
     }
 
     /**

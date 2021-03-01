@@ -20,15 +20,13 @@ import java.util.List;
 public abstract class ByteToMessageDecoderComponentAdapter<M extends UnParseBodyMessage> extends DeviceServerDecoderComponent<M> {
 
 
-    private ChannelInboundHandlerAdapter decoder = new ByteToMessageDecoderWrapper();
-
     public ByteToMessageDecoderComponentAdapter(DeviceProperties deviceProperties) {
         super(deviceProperties);
     }
 
     @Override
     public ChannelInboundHandlerAdapter getMessageDecoder() {
-        return this.decoder;
+        return new ByteToMessageDecoderWrapper();
     }
 
     protected class ByteToMessageDecoderWrapper extends ByteToMessageDecoder {

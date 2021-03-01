@@ -19,27 +19,30 @@ import java.util.List;
  */
 public abstract class DelimiterBasedFrameDecoderComponentAdapter<M extends UnParseBodyMessage> extends DeviceServerDecoderComponent<M> {
 
-
-    private DelimiterBasedFrameDecoderWrapper decoderWrapper;
+    private final ByteBuf[] delimiters;
+    private final int maxFrameLength;
+    private final boolean stripDelimiter;
+    private final boolean failFast;
 
     public DelimiterBasedFrameDecoderComponentAdapter(DeviceProperties deviceProperties, int maxFrameLength, ByteBuf delimiter) {
-        super(deviceProperties);
-        this.decoderWrapper = new DelimiterBasedFrameDecoderWrapper(maxFrameLength, delimiter);
+        this(deviceProperties, maxFrameLength, true, delimiter);
     }
 
     public DelimiterBasedFrameDecoderComponentAdapter(DeviceProperties deviceProperties, int maxFrameLength, boolean stripDelimiter, ByteBuf delimiter) {
-        super(deviceProperties);
-        this.decoderWrapper = new DelimiterBasedFrameDecoderWrapper(maxFrameLength, stripDelimiter, delimiter);
+        this(deviceProperties, maxFrameLength, stripDelimiter, true, delimiter);
     }
 
     public DelimiterBasedFrameDecoderComponentAdapter(DeviceProperties deviceProperties, int maxFrameLength, boolean stripDelimiter, boolean failFast, ByteBuf delimiter) {
         super(deviceProperties);
-        this.decoderWrapper = new DelimiterBasedFrameDecoderWrapper(maxFrameLength, stripDelimiter, failFast, delimiter);
+        this.maxFrameLength = maxFrameLength;
+        this.delimiters = new ByteBuf[]{delimiter};
+        this.stripDelimiter = stripDelimiter;
+        this.failFast = failFast;
     }
 
     @Override
     public ChannelInboundHandlerAdapter getMessageDecoder() {
-        return this.decoderWrapper;
+        return new DelimiterBasedFrameDecoderWrapper(maxFrameLength, stripDelimiter, failFast, this.delimiters);
     }
 
 
@@ -50,26 +53,6 @@ public abstract class DelimiterBasedFrameDecoderComponentAdapter<M extends UnPar
 
     protected class DelimiterBasedFrameDecoderWrapper extends DelimiterBasedFrameDecoder {
 
-        public DelimiterBasedFrameDecoderWrapper(int maxFrameLength, ByteBuf delimiter) {
-            super(maxFrameLength, delimiter);
-        }
-
-        public DelimiterBasedFrameDecoderWrapper(int maxFrameLength, boolean stripDelimiter, ByteBuf delimiter) {
-            super(maxFrameLength, stripDelimiter, delimiter);
-        }
-
-        public DelimiterBasedFrameDecoderWrapper(int maxFrameLength, boolean stripDelimiter, boolean failFast, ByteBuf delimiter) {
-            super(maxFrameLength, stripDelimiter, failFast, delimiter);
-        }
-
-        public DelimiterBasedFrameDecoderWrapper(int maxFrameLength, ByteBuf... delimiters) {
-            super(maxFrameLength, delimiters);
-        }
-
-        public DelimiterBasedFrameDecoderWrapper(int maxFrameLength, boolean stripDelimiter, ByteBuf... delimiters) {
-            super(maxFrameLength, stripDelimiter, delimiters);
-        }
-
         public DelimiterBasedFrameDecoderWrapper(int maxFrameLength, boolean stripDelimiter, boolean failFast, ByteBuf... delimiters) {
             super(maxFrameLength, stripDelimiter, failFast, delimiters);
         }
@@ -78,12 +61,16 @@ public abstract class DelimiterBasedFrameDecoderComponentAdapter<M extends UnPar
         protected Object decode(ChannelHandlerContext ctx, ByteBuf buffer) throws Exception {
             Object decode = super.decode(ctx, buffer);
             if(decode instanceof ByteBuf) {
-                M message = DelimiterBasedFrameDecoderComponentAdapter.this.decode(ctx, (ByteBuf) decode);
+                try {
+                    M message = DelimiterBasedFrameDecoderComponentAdapter.this.decode(ctx, (ByteBuf) decode);
 
-                return message != null ? message.build() : decode;
-            } else {
-                return decode;
+                    return message != null ? message.build() : decode;
+                } catch (Exception e) {
+                    ctx.fireExceptionCaught(e);
+                }
             }
+
+            return decode;
         }
     }
 }

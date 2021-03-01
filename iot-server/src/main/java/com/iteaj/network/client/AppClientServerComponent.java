@@ -8,6 +8,7 @@ import com.iteaj.network.client.app.AppClientUtil;
 import com.iteaj.network.config.DeviceProperties;
 import com.iteaj.network.consts.ExecStatus;
 import com.iteaj.network.server.component.DelimiterBasedFrameDecoderComponentAdapter;
+import com.iteaj.network.server.component.LengthFieldBasedFrameDecoderComponentAdapter;
 import com.iteaj.network.server.protocol.DeviceRequestProtocol;
 import com.iteaj.network.server.protocol.NoneDealProtocol;
 import io.netty.buffer.ByteBuf;
@@ -17,10 +18,11 @@ import io.netty.util.ReferenceCountUtil;
 
 import java.net.InetSocketAddress;
 
-public class AppClientServerComponent extends DelimiterBasedFrameDecoderComponentAdapter<AppClientMessage> {
+public class AppClientServerComponent extends LengthFieldBasedFrameDecoderComponentAdapter<AppClientMessage> {
+
 
     public AppClientServerComponent(DeviceProperties deviceProperties) {
-        super(deviceProperties, 1024, Unpooled.copiedBuffer(CoreConst.DELIMITER.getBytes()));
+        super(deviceProperties, 1024 * 2048, 0, 4, 0, 4);
     }
 
     @Override
@@ -58,22 +60,13 @@ public class AppClientServerComponent extends DelimiterBasedFrameDecoderComponen
 
     @Override
     public AppClientMessage decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
-        if(in.readableBytes() > 0) {
-            InetSocketAddress socketAddress = (InetSocketAddress)ctx.channel().remoteAddress();
-            String equipCode = socketAddress.getHostName()+":"+socketAddress.getPort();
+        InetSocketAddress socketAddress = (InetSocketAddress)ctx.channel().remoteAddress();
+        String equipCode = socketAddress.getHostName()+":"+socketAddress.getPort();
 
-            try {
-                in.retain();
-                byte[] message = new byte[in.readableBytes()];
-                in.readBytes(message);
+        byte[] message = new byte[in.readableBytes()];
+        in.readBytes(message);
 
-                return AppClientUtil.buildClientRequestMessage(message, equipCode);
-            } finally {
-                ReferenceCountUtil.release(in);
-            }
-        }
-
-        return null;
+        return AppClientUtil.buildClientRequestMessage(message, equipCode);
     }
 
 

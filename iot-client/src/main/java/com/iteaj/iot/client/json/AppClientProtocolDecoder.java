@@ -1,14 +1,17 @@
 package com.iteaj.iot.client.json;
 
-import com.iteaj.network.client.app.AppClientMessage;
 import com.iteaj.network.client.app.AppClientUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.DelimiterBasedFrameDecoder;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
-public class AppClientProtocolDecoder extends DelimiterBasedFrameDecoder {
-    public AppClientProtocolDecoder(int maxFrameLength, ByteBuf delimiter) {
-        super(maxFrameLength, delimiter);
+public class AppClientProtocolDecoder extends LengthFieldBasedFrameDecoder {
+
+    /**
+     * 最大的报文1M, 0开始作为长度字段的偏移, 长度字段长4个字节
+     */
+    public AppClientProtocolDecoder() {
+        super(1024 * 1024, 0, 4);
     }
 
     @Override
@@ -20,6 +23,8 @@ public class AppClientProtocolDecoder extends DelimiterBasedFrameDecoder {
             ByteBuf byteBuf = (ByteBuf) decode;
             byte[] message = new byte[byteBuf.readableBytes()];
             byteBuf.readBytes(message);
+            String s = new String(message, "UTF-8");
+            System.out.println(s);
             return AppClientUtil.buildServerResponseMessage(message);
         } finally {
 

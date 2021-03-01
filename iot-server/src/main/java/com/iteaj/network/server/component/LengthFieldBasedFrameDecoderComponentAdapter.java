@@ -20,33 +20,42 @@ import java.util.List;
  */
 public abstract class LengthFieldBasedFrameDecoderComponentAdapter<M extends UnParseBodyMessage> extends DeviceServerDecoderComponent<M> {
 
-    private LengthFieldBasedFrameDecoderWrapper decoderWrapper;
+    private final ByteOrder byteOrder;
+    private final int maxFrameLength;
+    private final int lengthFieldOffset;
+    private final int lengthFieldLength;
+    private final int lengthAdjustment;
+    private final int initialBytesToStrip;
+    private final boolean failFast;
 
     public LengthFieldBasedFrameDecoderComponentAdapter(DeviceProperties deviceProperties, int maxFrameLength, int lengthFieldOffset, int lengthFieldLength) {
-        super(deviceProperties);
-        decoderWrapper = new LengthFieldBasedFrameDecoderWrapper(maxFrameLength, lengthFieldOffset, lengthFieldLength);
+        this(deviceProperties, maxFrameLength, lengthFieldOffset, lengthFieldLength, 0, 0);
     }
 
     public LengthFieldBasedFrameDecoderComponentAdapter(DeviceProperties deviceProperties, int maxFrameLength, int lengthFieldOffset, int lengthFieldLength, int lengthAdjustment, int initialBytesToStrip) {
-        super(deviceProperties);
-        decoderWrapper = new LengthFieldBasedFrameDecoderWrapper(maxFrameLength, lengthFieldOffset, lengthFieldLength, lengthAdjustment, initialBytesToStrip);
+        this(deviceProperties, maxFrameLength, lengthFieldOffset, lengthFieldLength, lengthAdjustment, initialBytesToStrip, true);
     }
 
     public LengthFieldBasedFrameDecoderComponentAdapter(DeviceProperties deviceProperties, int maxFrameLength, int lengthFieldOffset, int lengthFieldLength, int lengthAdjustment, int initialBytesToStrip, boolean failFast) {
-        super(deviceProperties);
-        decoderWrapper = new LengthFieldBasedFrameDecoderWrapper(maxFrameLength, lengthFieldOffset, lengthFieldLength, lengthAdjustment, initialBytesToStrip, failFast);
-    }
+        this(deviceProperties, ByteOrder.BIG_ENDIAN, maxFrameLength, lengthFieldOffset, lengthFieldLength, lengthAdjustment, initialBytesToStrip, failFast);
+    }/**/
 
     public LengthFieldBasedFrameDecoderComponentAdapter(DeviceProperties deviceProperties, ByteOrder byteOrder, int maxFrameLength, int lengthFieldOffset, int lengthFieldLength, int lengthAdjustment, int initialBytesToStrip, boolean failFast) {
         super(deviceProperties);
-        decoderWrapper = new LengthFieldBasedFrameDecoderWrapper(byteOrder, maxFrameLength, lengthFieldOffset, lengthFieldLength, lengthAdjustment, initialBytesToStrip, failFast);
+        this.failFast = failFast;
+        this.byteOrder = byteOrder;
+        this.maxFrameLength = maxFrameLength;
+        this.lengthAdjustment = lengthAdjustment;
+        this.lengthFieldOffset = lengthFieldOffset;
+        this.lengthFieldLength = lengthFieldLength;
+        this.initialBytesToStrip = initialBytesToStrip;
     }
 
 
 
     @Override
     public ChannelInboundHandlerAdapter getMessageDecoder() {
-        return this.decoderWrapper;
+        return new LengthFieldBasedFrameDecoderWrapper(byteOrder, maxFrameLength, lengthFieldOffset, lengthFieldLength, lengthAdjustment, initialBytesToStrip, failFast);
     }
 
     @Override
@@ -56,18 +65,6 @@ public abstract class LengthFieldBasedFrameDecoderComponentAdapter<M extends UnP
 
     protected class LengthFieldBasedFrameDecoderWrapper extends LengthFieldBasedFrameDecoder {
 
-        public LengthFieldBasedFrameDecoderWrapper(int maxFrameLength, int lengthFieldOffset, int lengthFieldLength) {
-            super(maxFrameLength, lengthFieldOffset, lengthFieldLength);
-        }
-
-        public LengthFieldBasedFrameDecoderWrapper(int maxFrameLength, int lengthFieldOffset, int lengthFieldLength, int lengthAdjustment, int initialBytesToStrip) {
-            super(maxFrameLength, lengthFieldOffset, lengthFieldLength, lengthAdjustment, initialBytesToStrip);
-        }
-
-        public LengthFieldBasedFrameDecoderWrapper(int maxFrameLength, int lengthFieldOffset, int lengthFieldLength, int lengthAdjustment, int initialBytesToStrip, boolean failFast) {
-            super(maxFrameLength, lengthFieldOffset, lengthFieldLength, lengthAdjustment, initialBytesToStrip, failFast);
-        }
-
         public LengthFieldBasedFrameDecoderWrapper(ByteOrder byteOrder, int maxFrameLength, int lengthFieldOffset, int lengthFieldLength, int lengthAdjustment, int initialBytesToStrip, boolean failFast) {
             super(byteOrder, maxFrameLength, lengthFieldOffset, lengthFieldLength, lengthAdjustment, initialBytesToStrip, failFast);
         }
@@ -76,9 +73,13 @@ public abstract class LengthFieldBasedFrameDecoderComponentAdapter<M extends UnP
         protected Object decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
             Object decode = super.decode(ctx, in);
             if(decode instanceof ByteBuf) {
-                M message = LengthFieldBasedFrameDecoderComponentAdapter.this.decode(ctx, (ByteBuf) decode);
+                try {
+                    M message = LengthFieldBasedFrameDecoderComponentAdapter.this.decode(ctx, (ByteBuf) decode);
 
-                return message != null ? message.build() : decode;
+                    return message != null ? message.build() : decode;
+                } catch (Exception e) {
+                    ctx.fireExceptionCaught(e);
+                }
             }
 
             return decode;
