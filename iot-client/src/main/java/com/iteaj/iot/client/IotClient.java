@@ -5,4 +5,7 @@ public interface IotClient {
     int getPort();
 
     String getHost();
+
+    ClientComponent getClientComponent();
+
 }

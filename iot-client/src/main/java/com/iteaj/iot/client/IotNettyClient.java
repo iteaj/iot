@@ -62,6 +62,7 @@ public abstract class IotNettyClient implements IotClient{
                     Throwable cause = future.cause();
                     logger.error("客户端({}) 连接服务器失败, 60秒后重新连接 - 远程主机 {}:{}"
                             , getClientComponent().name(), this.getHost(), this.getPort(), cause);
+
                     channelFuture.channel().eventLoop().schedule(()->{
                         logger.error("客户端({}) 客户端再次尝试重连 - 主机 {}:{}"
                                 , getClientComponent().name(), this.getHost(), this.getPort());
