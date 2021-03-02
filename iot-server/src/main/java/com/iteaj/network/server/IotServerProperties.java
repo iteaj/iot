@@ -15,14 +15,9 @@ public class IotServerProperties {
     private LogLevel level = WARN;
 
     /**
-     * 监听客户端连接的服务端端口
+     * 应用程序客户端配置信息, 默认启用8088端口
      */
-    private int clientPort = 8088;
-
-    /**
-     * 应用程序客户端配置信息
-     */
-    private AppProperties app;
+    private AppProperties app = new AppProperties();
 
     /**
      * netty Selector boss组线程数量
@@ -33,14 +28,6 @@ public class IotServerProperties {
      * netty 工作组线程数量
      */
     private short workerThreadNum = 5;
-
-    public int getClientPort() {
-        return clientPort;
-    }
-
-    public void setClientPort(int clientPort) {
-        this.clientPort = clientPort;
-    }
 
     public short getBossThreadNum() {
         return bossThreadNum;
@@ -77,8 +64,21 @@ public class IotServerProperties {
 
     public static class AppProperties extends DeviceProperties {
 
+        /**
+         * 是否启用客户端端口监听
+         */
+        private boolean start = true;
+
         public AppProperties() {
             super(8088);
+        }
+
+        public boolean isStart() {
+            return start;
+        }
+
+        public void setStart(boolean start) {
+            this.start = start;
         }
     }
 }

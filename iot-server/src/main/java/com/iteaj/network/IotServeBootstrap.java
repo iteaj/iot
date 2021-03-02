@@ -275,7 +275,7 @@ public class IotServeBootstrap implements InitializingBean,DisposableBean
      * @return
      */
     @Bean
-    @ConditionalOnExpression("!${iot.server.app.port:'0'}.equals('0')")
+    @ConditionalOnExpression("${iot.server.app.start:true}")
     public AppClientServerComponent clientServerComponent(IotServerProperties properties) {
         return new AppClientServerComponent(properties.getApp());
     }

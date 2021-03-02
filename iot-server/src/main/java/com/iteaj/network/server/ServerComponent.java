@@ -50,7 +50,7 @@ public abstract class ServerComponent implements FrameworkComponent, Initializin
             throw new BeanInitializationException("组件["+getClass().getSimpleName()+"]未创建协议工厂实例["+ProtocolFactory.class.getSimpleName()+"]");
         }
 
-        if(this.protocolFactory instanceof DeviceProtocolFactory) {
+        if(this.protocolFactory instanceof ProtocolFactory) {
             ProtocolFactory protocolFactory = (ProtocolFactory) this.protocolFactory;
             if (protocolFactory.getDelegation() == null) {
                 protocolFactory.setDelegation(protocolTimeoutStorage());

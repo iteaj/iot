@@ -1,20 +1,16 @@
 package com.iteaj.network.client;
 
 import com.iteaj.network.AbstractProtocol;
-import com.iteaj.network.CoreConst;
 import com.iteaj.network.client.app.AppClientMessage;
 import com.iteaj.network.client.app.AppClientType;
 import com.iteaj.network.client.app.AppClientUtil;
 import com.iteaj.network.config.DeviceProperties;
 import com.iteaj.network.consts.ExecStatus;
-import com.iteaj.network.server.component.DelimiterBasedFrameDecoderComponentAdapter;
 import com.iteaj.network.server.component.LengthFieldBasedFrameDecoderComponentAdapter;
 import com.iteaj.network.server.protocol.DeviceRequestProtocol;
 import com.iteaj.network.server.protocol.NoneDealProtocol;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.util.ReferenceCountUtil;
 
 import java.net.InetSocketAddress;
 

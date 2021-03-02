@@ -41,12 +41,12 @@ public abstract class DeviceServerDecoderComponent<M extends UnParseBodyMessage>
 
     @Override
     protected IotDeviceServer createDeviceServer() {
-        return this;
+        return this.deviceServerWrapper;
     }
 
     @Override
     protected DeviceProtocolFactory createProtocolFactory() {
-        return this;
+        return this.delegation;
     }
 
     @Override
