@@ -1,11 +1,14 @@
 package com.iteaj.network.codec;
 
 import com.iteaj.network.AbstractMessage;
+import com.iteaj.network.CoreConst;
 import com.iteaj.network.message.UnParseBodyMessage;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.util.Attribute;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -16,6 +19,32 @@ import java.util.List;
  * @since 1.0
  */
 public interface DeviceMessageDecoder<M extends AbstractMessage> {
+
+    /**
+     *
+     * 对decode方法进行代理
+     * @see #decode(ChannelHandlerContext, ByteBuf)
+     * @param ctx
+     * @param in
+     * @return
+     */
+    default M proxy(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
+        M message = decode(ctx, in);
+        if(message != null) {
+            if(message instanceof UnParseBodyMessage) {
+                ((UnParseBodyMessage) message).build();
+            }
+
+            // 设置设备编号到对应的Channel
+            Attribute attribute = ctx.channel().attr(CoreConst.EQUIP_CODE);
+            if(attribute.get() == null) {
+                String equipCode = message.getHead().getEquipCode();
+                attribute.set(equipCode);
+            }
+        }
+
+        return message;
+    }
 
     /**
      * 解码单条报文
@@ -34,17 +63,9 @@ public interface DeviceMessageDecoder<M extends AbstractMessage> {
      * @throws Exception
      */
     default List<M> decodes(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
-        M decode = decode(ctx, in);
+        M decode = proxy(ctx, in);
         if(decode != null) {
-            List<M> out = new ArrayList<>();
-
-            if(decode instanceof UnParseBodyMessage) {
-                ((UnParseBodyMessage) decode).build();
-            }
-
-            out.add(decode);
-
-            return out;
+            return Arrays.asList(decode);
         } else {
             return null;
         }

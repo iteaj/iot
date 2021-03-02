@@ -1,9 +1,13 @@
 package com.iteaj.network.server.handle;
 
 import com.iteaj.network.AbstractProtocol;
+import com.iteaj.network.CoreConst;
+import com.iteaj.network.IotServeBootstrap;
 import com.iteaj.network.Message;
 import com.iteaj.network.business.BusinessFactory;
 import com.iteaj.network.client.AppClientServerProtocol;
+import com.iteaj.network.event.ExceptionEvent;
+import com.iteaj.network.event.ExceptionEventListener;
 import com.iteaj.network.message.UnParseBodyMessage;
 import com.iteaj.network.server.DeviceServerComponent;
 import com.iteaj.network.server.ServerComponent;
@@ -15,6 +19,8 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.util.Attribute;
+import io.netty.util.AttributeKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,4 +99,16 @@ public class ProtocolBusinessHandler extends SimpleChannelInboundHandler<UnParse
         }
     }
 
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        Object o = ctx.channel().attr(CoreConst.EQUIP_CODE).get();
+        String equipCode = o == null ? null : (String) o;
+
+        logger.error("协议异常 {} - 设备编号: {} - 处理方式：已发送异常事件[{}], 请创建监听器[{}]"
+                , cause.getMessage(), equipCode, ExceptionEvent.class.getName()
+                , ExceptionEventListener.class.getName(), cause);
+
+        IotServeBootstrap.publishApplicationEvent(new ExceptionEvent(cause, equipCode));
+    }
 }

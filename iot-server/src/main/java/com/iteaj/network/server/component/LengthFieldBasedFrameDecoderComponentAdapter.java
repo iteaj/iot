@@ -74,9 +74,9 @@ public abstract class LengthFieldBasedFrameDecoderComponentAdapter<M extends UnP
             Object decode = super.decode(ctx, in);
             if(decode instanceof ByteBuf) {
                 try {
-                    M message = LengthFieldBasedFrameDecoderComponentAdapter.this.decode(ctx, (ByteBuf) decode);
+                    M message = LengthFieldBasedFrameDecoderComponentAdapter.this.proxy(ctx, (ByteBuf) decode);
 
-                    return message != null ? message.build() : decode;
+                    return message != null ? message : decode;
                 } catch (Exception e) {
                     ctx.fireExceptionCaught(e);
                 }

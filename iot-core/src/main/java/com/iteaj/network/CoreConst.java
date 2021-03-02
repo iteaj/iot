@@ -1,11 +1,11 @@
 package com.iteaj.network;
 
+import io.netty.util.AttributeKey;
+
 public interface CoreConst {
 
     /**
-     * 应用程序客户端报文分隔符
+     * 设备编号的KEY
      */
-    String DELIMITER = "$_$";
-
-    byte[] EMPTY_MESSAGE = new byte[0];
+    AttributeKey EQUIP_CODE = AttributeKey.newInstance("EquipCode");
 }

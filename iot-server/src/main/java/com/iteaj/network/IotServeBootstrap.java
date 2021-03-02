@@ -29,7 +29,9 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
@@ -173,9 +175,9 @@ public class IotServeBootstrap implements InitializingBean,DisposableBean
 
             // 新增事件管理处理
             if(p.get("idleState") != null) { // 如果有启用超时处理
-                p.addAfter("idleState", "eventManager", new EventManagerHandler(deviceManager, serverComponent));
+                p.addAfter("idleState", "eventManager", EventManagerHandler.getInstance(deviceManager, COMPONENT_FACTORY));
             } else {
-                p.addLast("eventManager", new EventManagerHandler(deviceManager, serverComponent));
+                p.addLast("eventManager", EventManagerHandler.getInstance(deviceManager, COMPONENT_FACTORY));
             }
 
             p.addFirst("encode", protocolEncoder); // 设备协议编码通用
@@ -237,7 +239,8 @@ public class IotServeBootstrap implements InitializingBean,DisposableBean
         return new AppClientServerHandle();
     }
 
-    @Bean({"deviceManager"})
+    @Bean({"deviceManager", "devicePipelineManager"})
+    @ConditionalOnMissingBean(name = "devicePipelineManager")
     public DevicePipelineManager devicePipelineManager() {
         return DevicePipelineManager.getInstance();
     }
@@ -285,7 +288,8 @@ public class IotServeBootstrap implements InitializingBean,DisposableBean
      * @param componentFactory
      * @return
      */
-    @Bean
+    @Bean("serverTimeoutProtocolManager")
+    @ConditionalOnMissingBean(name = "serverTimeoutProtocolManager")
     public ServerTimeoutProtocolManager serverTimeoutProtocolManager(ServerComponentFactory componentFactory) {
         List<ProtocolTimeoutStorage> storages = componentFactory.getServerComponents()
                 .stream()

@@ -1,19 +1,18 @@
 package com.iteaj.network.server.handle;
 
+import com.iteaj.network.CoreConst;
 import com.iteaj.network.DeviceManager;
 import com.iteaj.network.IotServeBootstrap;
+import com.iteaj.network.ProtocolException;
 import com.iteaj.network.event.DeviceEvent;
 import com.iteaj.network.event.DeviceEventType;
-import com.iteaj.network.event.ExceptionEvent;
 import com.iteaj.network.message.UnParseBodyMessage;
-import com.iteaj.network.server.DeviceServerComponent;
 import com.iteaj.network.server.ServerComponent;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.SimpleChannelInboundHandler;
+import com.iteaj.network.server.ServerComponentFactory;
+import io.netty.channel.*;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
+import io.netty.util.Attribute;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,19 +26,24 @@ import java.net.InetSocketAddress;
  * @author iteaj
  * @since 1.7
  */
+@ChannelHandler.Sharable
 public class EventManagerHandler extends SimpleChannelInboundHandler<UnParseBodyMessage> {
 
-    private int count = 0; //计数器
-    private int idleTimesToClose = 3; //多少次关闭链接
-    /**用来存放当前{@link io.netty.channel.Channel}对应的设备的设备号*/
-    private String equipCode;
     private static DeviceManager deviceManager; //设备管理器
-    private ServerComponent serverComponent; // 此事件管理器管理哪个服务端设备
+    private static EventManagerHandler managerHandler;
+    private ServerComponentFactory componentFactory;
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    public EventManagerHandler(DeviceManager deviceManager, ServerComponent serverComponent) {
+    public static EventManagerHandler getInstance(DeviceManager deviceManager, ServerComponentFactory componentFactory) {
+        if(managerHandler == null) {
+            managerHandler = new EventManagerHandler(deviceManager, componentFactory);
+        }
+        return managerHandler;
+    }
+
+    protected EventManagerHandler(DeviceManager deviceManager, ServerComponentFactory componentFactory) {
         this.deviceManager = deviceManager;
-        this.serverComponent = serverComponent;
+        this.componentFactory = componentFactory;
     }
 
     /**
@@ -74,41 +78,37 @@ public class EventManagerHandler extends SimpleChannelInboundHandler<UnParseBody
      * @param ctx
      */
     protected void readerHandle(final ChannelHandlerContext ctx, String desc){
-        count ++;
+
+        String equipCode = (String) ctx.channel().attr(CoreConst.EQUIP_CODE).get();
         InetSocketAddress address = (InetSocketAddress) ctx.channel().remoteAddress();
         final String target = address.getHostString()+":"+address.getPort();
-        if(idleTimesToClose == count){
-            ctx.channel().close().addListener((ChannelFutureListener) future -> {
-                if(future.isSuccess()){
-                    //链接关闭的时候移除对应的设备
-                    if(StringUtils.isNotBlank(equipCode)) {
-                        deviceManager.remove(equipCode);
-                        logger.warn("{} - 设备编号: {} - 客户端地址: {} 已超过{}次没有发送数据, 将主动下线设备(下线成功)", desc, this.equipCode, target, idleTimesToClose);
-                    }
 
-                } else {
-                    logger.warn("{} - 设备编号: {} - 客户端地址: {} 已超过{}次没有发送数据, 将主动下线设备(下线失败)", desc, this.equipCode, target, idleTimesToClose);
+        ctx.channel().close().addListener((ChannelFutureListener) future -> {
+            if(future.isSuccess()){
+                //链接关闭的时候移除对应的设备
+                if(StringUtils.isNotBlank(equipCode)) {
+                    deviceManager.remove(equipCode);
+                    logger.warn("{} - 设备编号: {} - 客户端地址: {} - 说明: 主动下线设备(下线成功)", desc, equipCode, target);
                 }
-            });
 
-            return;
-        }
+            } else {
+                logger.warn("{} - 设备编号: {} - 客户端地址: {} - 说明: 主动下线设备(下线失败)", desc, equipCode, target);
+            }
+        });
 
-        if(logger.isWarnEnabled())
-            logger.warn("{}告警 - 设备编号: {} - 客户端地址: {} 第{}次", desc, this.equipCode, target, count);
+        return;
+
     }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, UnParseBodyMessage msg) throws Exception {
-        count = 0;
         if(msg.getHead() == null || msg.getHead().getEquipCode() == null) {
             logger.error("事件管理器错误, 没办法注册设备到设备管理器, 请检查报文是否包含报文头及报文头包含设备编号 - 报文: {}", msg);
             return;
         }
 
         //获取设备编号,验证此设备是否已经连接
-        this.equipCode = msg.getHead().getEquipCode();
-
+        String equipCode = (String) ctx.channel().attr(CoreConst.EQUIP_CODE).get();
         ChannelPipeline pipeline = (ChannelPipeline) deviceManager.get(equipCode);
 
         //设备还没有注册到设备管理器,则注册
@@ -116,11 +116,12 @@ public class EventManagerHandler extends SimpleChannelInboundHandler<UnParseBody
             deviceManager.add(equipCode, ctx.pipeline());
 
             //触发设备上线事件
-            IotServeBootstrap.publishApplicationEvent(new DeviceEvent(this.equipCode, DeviceEventType.设备上线));
+            IotServeBootstrap.publishApplicationEvent(new DeviceEvent(equipCode, DeviceEventType.设备上线));
 
             if(logger.isDebugEnabled()) {
+                ServerComponent serverComponent = componentFactory.getByClass(msg.getClass());
                 logger.debug("设备上线({}) - 设备编号: {} - 服务描述: {}", serverComponent.name()
-                        , this.equipCode, serverComponent.deviceServer().desc());
+                        , equipCode, serverComponent.deviceServer().desc());
             }
         } else { //设备已经存在,判断是否是同一台设备
 
@@ -137,7 +138,7 @@ public class EventManagerHandler extends SimpleChannelInboundHandler<UnParseBody
                 deviceManager.add(equipCode, ctx.pipeline());
 
                 //触发设备上线事件
-                IotServeBootstrap.publishApplicationEvent(new DeviceEvent(this.equipCode, DeviceEventType.设备上线));
+                IotServeBootstrap.publishApplicationEvent(new DeviceEvent(equipCode, DeviceEventType.设备上线));
             }
         }
 
@@ -146,21 +147,37 @@ public class EventManagerHandler extends SimpleChannelInboundHandler<UnParseBody
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        if(this.equipCode != null) {
-            // 断线后移除设备
-            deviceManager.remove(equipCode);
+        try {
+            Attribute attribute = ctx.channel().attr(CoreConst.EQUIP_CODE);
+            InetSocketAddress address = (InetSocketAddress)ctx.channel().localAddress();
+            ServerComponent serverComponent = componentFactory.getByPort(address.getPort());
 
-            //触发设备下线事件
-            IotServeBootstrap.publishApplicationEvent(new DeviceEvent(this.equipCode, DeviceEventType.设备断线));
+            if(attribute != null) {
+                Object equipCode = attribute.get();
+                if(equipCode instanceof String) {
 
-            logger.warn("设备断线({}) - 设备编号: {} - 客户端地址: {} - 说明: 移除从设备管理里面", serverComponent.name(), this.equipCode);
-        } else {
+                    // 断线后移除设备
+                    Object remove = deviceManager.remove(equipCode);
+
+                    //触发设备下线事件
+                    InetSocketAddress remoteAddress = (InetSocketAddress) ctx.channel().remoteAddress();
+                    IotServeBootstrap.publishApplicationEvent(new DeviceEvent((String) equipCode, DeviceEventType.设备断线));
+
+                    logger.warn("设备断线({}) - 设备编号: {} - 客户端地址: {} - 状态：{} - 说明: 移除从设备管理里面"
+                            , serverComponent.name(), equipCode, remoteAddress.getHostName()+":"+remoteAddress.getPort()
+                            , remove != null ? "移除成功" : "移除失败");
+
+                    return;
+                }
+            }
+
+            logger.error("设备断线({}) 移除设备失败", serverComponent.name()
+                    , new ProtocolException("获取不到设备编号[io.netty.util.Attribute.get() == null]" +
+                            ", 请确认是否保存设备编号[io.netty.util.Attribute.set()], 具体属性[CoreConst.EQUIP_CODE]"));
+        } finally {
             ctx.fireChannelInactive();
         }
+
     }
 
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        IotServeBootstrap.publishApplicationEvent(new ExceptionEvent(cause, this.equipCode));
-    }
 }

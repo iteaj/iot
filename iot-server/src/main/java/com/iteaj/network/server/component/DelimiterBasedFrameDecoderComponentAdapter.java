@@ -1,5 +1,6 @@
 package com.iteaj.network.server.component;
 
+import com.iteaj.network.CoreConst;
 import com.iteaj.network.config.DeviceProperties;
 import com.iteaj.network.message.UnParseBodyMessage;
 import com.iteaj.network.server.DeviceServerComponent;
@@ -8,6 +9,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.DelimiterBasedFrameDecoder;
+import io.netty.util.Attribute;
 
 import java.util.List;
 
@@ -62,9 +64,9 @@ public abstract class DelimiterBasedFrameDecoderComponentAdapter<M extends UnPar
             Object decode = super.decode(ctx, buffer);
             if(decode instanceof ByteBuf) {
                 try {
-                    M message = DelimiterBasedFrameDecoderComponentAdapter.this.decode(ctx, (ByteBuf) decode);
+                    M message = DelimiterBasedFrameDecoderComponentAdapter.this.proxy(ctx, (ByteBuf) decode);
 
-                    return message != null ? message.build() : decode;
+                    return message != null ? message : decode;
                 } catch (Exception e) {
                     ctx.fireExceptionCaught(e);
                 }
