@@ -22,4 +22,4 @@
 8. 中央空调控制面板
 ...
 #### 3. 架构图
-![iot架构图](https://images.gitee.com/uploads/images/2021/0303/204957_a0b089b1_1230742.png "iot.png")
+![iot架构图](https://images.gitee.com/uploads/images/2021/0303/210010_da7cfaa4_1230742.png "iot.png")
