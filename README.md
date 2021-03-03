@@ -4,18 +4,18 @@
 正式版: 功能较少
 ```
  <dependency>
-      <groupId>com.iteaj</groupId>
-      <artifactId>iot-xxx</artifactId>
-      <version>1.0.0</version>
-  </dependency>
+     <groupId>com.iteaj</groupId>
+     <artifactId>iot-xxx</artifactId>
+     <version>1.0.0</version>
+ </dependency>
 ```
 快照版：相比于1.0.0版本新增了很多实用功能并精简和优化了很多代码，所以不建议使用1.0.0版本，由于快照版本的api已经固定后期将不会大改，已经可以使用
 ```
  <dependency>
-      <groupId>com.iteaj</groupId>
-      <artifactId>iot-xxx</artifactId>
-      <version>1.1.0-SNAPSHOT</version>
-  </dependency>
+     <groupId>com.iteaj</groupId>
+     <artifactId>iot-xxx</artifactId>
+     <version>1.1.0-SNAPSHOT</version>
+ </dependency>
 ```
 #### 1. 主要功能
 1. 支持监听多个端口, 对接多种设备类型
