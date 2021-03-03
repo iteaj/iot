@@ -21,5 +21,5 @@
 7. 中控智慧门禁BS版
 8. 中央空调控制面板
 ...
-#### 架构图
+#### 3. 架构图
 ![iot架构图](https://images.gitee.com/uploads/images/2021/0303/204957_a0b089b1_1230742.png "iot.png")
