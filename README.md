@@ -1,5 +1,22 @@
-#### iot
-基于netty, spring boot, redis等开源项目开发来的物联网框架, 支持udp, tcp底层协议和http, mqtt, modbus等上层协议. 支持对设备同步和异步的调用操作. 主要向开发人员开放了一套统一、简洁的用于操作设备的Api接口. 该框架只提供和设备对接部分（通过spring的bean注入解耦特性实现业务和协议实现分离）, 使用此框架的客户必须遵循此框架设计的Api规范;接入一台设备只需创建两三个对象(协议的实现不算在内).并提供丰富的日志输出，异常触发
+#### iot物联网框架
+基于netty, spring boot, redis等开源项目开发来的物联网框架, 支持udp, tcp底层协议和http, mqtt, modbus等上层协议. 支持对设备同步和异步的调用操作. 主要向开发人员开放了一套统一、简洁的用于操作设备的Api接口. 该框架只提供和设备对接部分（通过spring的bean注入解耦特性实现业务和协议实现分离）, 使用此框架的客户必须遵循此框架设计的Api规范;接入一台设备只需创建两三个对象(协议的实现不算在内).并提供丰富的日志输出用于支持调试以及详细的代码注释
+##### 版本管理
+正式版: 功能较少
+```
+ <dependency>
+      <groupId>com.iteaj</groupId>
+      <artifactId>iot-server</artifactId>
+      <version>1.0.0</version>
+  </dependency>
+```
+快照版：相比于1.0.0版本新增了很多实用功能并精简和优化了很多代码，所以不建议使用1.0.0版本，由于快照版本的api已经固定后期将不会大改，已经可以使用
+```
+ <dependency>
+      <groupId>com.iteaj</groupId>
+      <artifactId>iot-server</artifactId>
+      <version>1.1.0-SNAPSHOT</version>
+  </dependency>
+```
 #### 1. 主要功能
 1. 支持监听多个端口, 对接多种设备类型
 2. 拥有一个设备库, 此库已经对接好多种设备
