@@ -5,7 +5,7 @@
 ```
  <dependency>
       <groupId>com.iteaj</groupId>
-      <artifactId>iot-server</artifactId>
+      <artifactId>iot-xxx</artifactId>
       <version>1.0.0</version>
   </dependency>
 ```
@@ -13,7 +13,7 @@
 ```
  <dependency>
       <groupId>com.iteaj</groupId>
-      <artifactId>iot-server</artifactId>
+      <artifactId>iot-xxx</artifactId>
       <version>1.1.0-SNAPSHOT</version>
   </dependency>
 ```
