@@ -240,7 +240,7 @@ public class IotServeBootstrap implements InitializingBean,DisposableBean
     }
 
     @Bean({"deviceManager", "devicePipelineManager"})
-    @ConditionalOnMissingBean(name = "devicePipelineManager")
+    @ConditionalOnMissingBean(name = {"devicePipelineManager", "deviceManager"})
     public DevicePipelineManager devicePipelineManager() {
         return DevicePipelineManager.getInstance();
     }
