@@ -107,10 +107,16 @@ public class EventManagerHandler extends SimpleChannelInboundHandler<UnParseBody
             return;
         }
 
-        //获取设备编号,验证此设备是否已经连接
+        //获取设备编号
         String equipCode = (String) ctx.channel().attr(CoreConst.EQUIP_CODE).get();
-        ChannelPipeline pipeline = (ChannelPipeline) deviceManager.get(equipCode);
+        if(null == equipCode) {
+            equipCode = msg.getHead().getEquipCode();
 
+            // 设置设备编号到对应的Channel
+            ctx.channel().attr(CoreConst.EQUIP_CODE).setIfAbsent(equipCode);
+        }
+
+        ChannelPipeline pipeline = (ChannelPipeline) deviceManager.get(equipCode);
         //设备还没有注册到设备管理器,则注册
         if(null == pipeline){
             deviceManager.add(equipCode, ctx.pipeline());
@@ -125,11 +131,12 @@ public class EventManagerHandler extends SimpleChannelInboundHandler<UnParseBody
             }
         } else { //设备已经存在,判断是否是同一台设备
 
+            final String deviceSn = equipCode;
             //不是同一台设备则关闭早期一台
             if(pipeline != ctx.pipeline()){
                 pipeline.close().addListener((ChannelFutureListener) future -> {
-                    String status = future.isSuccess() ? "关闭成功" : "关闭失败";
-                    logger.warn("设备编号冲突 - 设备编号: {} - 处理方案: 移除早期的一台 - 状态：{}", equipCode, status);
+                    String status = future.isSuccess() ? "成功" : "失败";
+                    logger.warn("设备编号冲突 - 设备编号: {} - 处理方案: 移除早期的一台 - 关闭状态：{}", deviceSn, status);
                 });
 
                 // 先移除早期的一台

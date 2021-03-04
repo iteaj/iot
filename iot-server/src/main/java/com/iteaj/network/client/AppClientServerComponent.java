@@ -16,7 +16,6 @@ import java.net.InetSocketAddress;
 
 public class AppClientServerComponent extends LengthFieldBasedFrameDecoderComponentAdapter<AppClientMessage> {
 
-
     public AppClientServerComponent(DeviceProperties deviceProperties) {
         super(deviceProperties, 1024 * 2048, 0, 4, 0, 4);
     }

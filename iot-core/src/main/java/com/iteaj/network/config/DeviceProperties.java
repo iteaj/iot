@@ -10,12 +10,12 @@ public class DeviceProperties {
     /**
      * 没读和没写多长时间判断失活
      */
-    private long allIdleTime = 0;
+    private long allIdleTime = 90;
 
     /**
      * 多久没读判断失活的时间
      */
-    private long readerIdleTime = 60;
+    private long readerIdleTime = 0;
 
     /**
      * 多久没写判断失活的时间

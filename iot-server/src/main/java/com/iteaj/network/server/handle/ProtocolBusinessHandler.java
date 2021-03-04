@@ -24,6 +24,8 @@ import io.netty.util.AttributeKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.InetSocketAddress;
+
 /**
  * <p>协议的业务处理 handler</p>
  * Create Date By 2020-09-06
@@ -105,9 +107,12 @@ public class ProtocolBusinessHandler extends SimpleChannelInboundHandler<UnParse
         Object o = ctx.channel().attr(CoreConst.EQUIP_CODE).get();
         String equipCode = o == null ? null : (String) o;
 
-        logger.error("协议异常 {} - 设备编号: {} - 处理方式：已发送异常事件[{}], 请创建监听器[{}]"
-                , cause.getMessage(), equipCode, ExceptionEvent.class.getName()
-                , ExceptionEventListener.class.getName(), cause);
+        InetSocketAddress address = (InetSocketAddress)ctx.channel().localAddress();
+        final ServerComponent serverComponent = componentFactory.getByPort(address.getPort());
+
+        logger.error("协议异常({}) - 设备编号: {} - 处理方式：已发送异常事件[{}], 创建监听器[{}]用于监听异常事件"
+                , serverComponent.name(), equipCode, ExceptionEvent.class.getSimpleName()
+                , ExceptionEventListener.class.getSimpleName(), cause);
 
         IotServeBootstrap.publishApplicationEvent(new ExceptionEvent(cause, equipCode));
     }

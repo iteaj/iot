@@ -1,15 +1,12 @@
 package com.iteaj.network.server.component;
 
-import com.iteaj.network.CoreConst;
 import com.iteaj.network.config.DeviceProperties;
 import com.iteaj.network.message.UnParseBodyMessage;
 import com.iteaj.network.server.DeviceServerComponent;
-import com.iteaj.network.server.DeviceServerDecoderComponent;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.DelimiterBasedFrameDecoder;
-import io.netty.util.Attribute;
 
 import java.util.List;
 
@@ -19,7 +16,7 @@ import java.util.List;
  * @author iteaj
  * @since 1.0
  */
-public abstract class DelimiterBasedFrameDecoderComponentAdapter<M extends UnParseBodyMessage> extends DeviceServerDecoderComponent<M> {
+public abstract class DelimiterBasedFrameDecoderComponentAdapter<M extends UnParseBodyMessage> extends DeviceTcpDecoderComponent<M> {
 
     private final ByteBuf[] delimiters;
     private final int maxFrameLength;

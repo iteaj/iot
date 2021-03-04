@@ -1,16 +1,19 @@
-package com.iteaj.network.server;
+package com.iteaj.network.server.component;
 
 import com.iteaj.network.*;
 import com.iteaj.network.codec.DeviceMessageDecoder;
 import com.iteaj.network.config.DeviceProperties;
 import com.iteaj.network.message.UnParseBodyMessage;
-import io.netty.bootstrap.ServerBootstrap;
+import com.iteaj.network.server.AbstractDeviceServer;
+import com.iteaj.network.server.DeviceServerComponent;
+import com.iteaj.network.server.IotDeviceServer;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelPipeline;
-import io.netty.channel.socket.SocketChannel;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.GenericTypeResolver;
-import org.springframework.core.ResolvableType;
+
+import java.util.List;
 
 /**
  * create time: 2021/2/20
@@ -18,17 +21,17 @@ import org.springframework.core.ResolvableType;
  * @author iteaj
  * @since 1.0
  */
-public abstract class DeviceServerDecoderComponent<M extends UnParseBodyMessage> extends DeviceServerComponent
-        implements IotDeviceServer, DeviceProtocolFactory<M>, DeviceMessageDecoder<M> {
+public abstract class DeviceTcpDecoderComponent<M extends UnParseBodyMessage> extends DeviceServerComponent
+        implements IotDeviceServer, DeviceProtocolFactory<M>, DeviceMessageDecoder<M, ByteBuf> {
 
-    private ProtocolFactoryWrapper delegation;
+    private ProtocolFactoryComponentWrapper delegation;
     private DeviceProperties deviceProperties;
     private DeviceServerWrapper deviceServerWrapper;
 
-    public DeviceServerDecoderComponent(DeviceProperties deviceProperties) {
+    public DeviceTcpDecoderComponent(DeviceProperties deviceProperties) {
         this.deviceProperties = deviceProperties;
-        this.delegation = new ProtocolFactoryWrapper();
         this.deviceServerWrapper = new DeviceServerWrapper(deviceProperties);
+        this.delegation = new ProtocolFactoryComponentWrapper(this);
     }
 
     @Override
@@ -54,11 +57,13 @@ public abstract class DeviceServerDecoderComponent<M extends UnParseBodyMessage>
         deviceServerWrapper.initChannelPipeline(pipeline);
     }
 
+    @Override
+    public abstract M decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception;
 
     @Override
     public Class<M> messageClass() {
         Class<?> aClass = GenericTypeResolver.resolveTypeArgument(getClass()
-                , DeviceServerDecoderComponent.class);
+                , DeviceTcpDecoderComponent.class);
         return (Class<M>) aClass;
     }
 
@@ -99,25 +104,18 @@ public abstract class DeviceServerDecoderComponent<M extends UnParseBodyMessage>
 
         @Override
         public ChannelInboundHandlerAdapter getMessageDecoder() {
-            return DeviceServerDecoderComponent.this.getMessageDecoder();
+            return DeviceTcpDecoderComponent.this.getMessageDecoder();
         }
 
         @Override
         public String name() {
-            return DeviceServerDecoderComponent.this.name();
+            return DeviceTcpDecoderComponent.this.name();
         }
 
         @Override
         public String desc() {
-            return DeviceServerDecoderComponent.this.desc();
+            return DeviceTcpDecoderComponent.this.desc();
         }
     }
 
-    protected class ProtocolFactoryWrapper extends ProtocolFactory<M> {
-
-        @Override
-        public AbstractProtocol getProtocol(M message) {
-            return DeviceServerDecoderComponent.this.getProtocol(message);
-        }
-    }
 }
