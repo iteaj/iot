@@ -30,6 +30,7 @@ public class ClientHandleBeanPostProcessor implements BeanPostProcessor {
                     tradeType += iotMapping.value();
                 }
 
+
                 if(StringUtils.hasText(tradeType)) {
                     final Method method = clientMapping.get(tradeType);
                     if(method == null) {
