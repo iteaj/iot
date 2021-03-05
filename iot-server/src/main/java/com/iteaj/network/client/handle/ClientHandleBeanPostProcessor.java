@@ -21,6 +21,10 @@ public class ClientHandleBeanPostProcessor implements BeanPostProcessor {
             final String value = clientHandle.value();
             ReflectionUtils.doWithMethods(bean.getClass(), item -> {
                 final IotMapping iotMapping = item.getAnnotation(IotMapping.class);
+                if(iotMapping == null) {
+                    return;
+                }
+
                 String tradeType = value;
                 if(iotMapping != null || iotMapping.value() != null) {
                     tradeType += iotMapping.value();
