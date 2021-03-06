@@ -298,11 +298,30 @@ public abstract class PlatformRequestProtocol<M extends AbstractMessage> extends
         ClientRelationEntity clientEntity = this.getClientEntity();
 
         if(clientEntity != null) {
+
             AppClientResponseBody responseBody;
             if(clientResp instanceof AppClientResponseBody) {
                 responseBody = (AppClientResponseBody) clientResp;
+                if(responseBody.getStatus() == null) {
+                    responseBody.setStatus(getExecStatus());
+                }
+
+                if(responseBody.getReason() == null) {
+                    responseBody.setReason("success");
+                }
             } else {
-                responseBody = new AppClientResponseBody(getExecStatus().desc, getExecStatus());
+                ExecStatus execStatus = getExecStatus();
+                String reason = execStatus.desc;
+                if(execStatus != ExecStatus.成功) {
+                    String equipCode = getEquipCode();
+                    if(execStatus == ExecStatus.断线) {
+                        reason = "设备["+ equipCode +"]不在线";
+                    } else if(execStatus == ExecStatus.超时) {
+                        reason = "请求设备超时["+equipCode+"]";
+                    }
+                }
+
+                responseBody = new AppClientResponseBody(reason, execStatus);
             }
 
             AppClientMessage<AppClientResponseBody> serverResponseMessage = AppClientUtil.buildServerResponseMessage(clientEntity, responseBody);
@@ -315,16 +334,6 @@ public abstract class PlatformRequestProtocol<M extends AbstractMessage> extends
                             , hashCode(), clientEntity.getEquipCode(), null, clientEntity.getTradeType());
                 }
             });
-        } else {
-            /**
-             * 此次调用是否由应用程序客户端发起的
-             * @see AppClientServerProtocol
-             * @see AppClientServerHandle#doBusiness(AppClientServerProtocol)
-             * @see ClientRelation#isClientStart()
-             */
-            if(logger.isDebugEnabled()) {
-                logger.debug("应用客户端协议处理 无需响应客户端 - 协议类型: {} - 说明: 此协议由应用程序客户端发起的请求调用", getClass().getSimpleName());
-            }
         }
     }
 

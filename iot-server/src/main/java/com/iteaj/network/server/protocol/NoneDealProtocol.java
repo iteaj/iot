@@ -1,8 +1,7 @@
 package com.iteaj.network.server.protocol;
 
 import com.iteaj.network.AbstractMessage;
-import com.iteaj.network.protocol.ProtocolType;
-import com.iteaj.network.server.service.NoneRequestService;
+import com.iteaj.network.protocol.CommonProtocolType;
 
 import java.io.IOException;
 
@@ -40,7 +39,7 @@ public class NoneDealProtocol extends PlatformRequestProtocol<AbstractMessage> {
     }
 
     @Override
-    public ProtocolType protocolType() {
-        return ProtocolType.NoneMap;
+    public CommonProtocolType protocolType() {
+        return CommonProtocolType.NoneMap;
     }
 }

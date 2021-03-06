@@ -1,7 +1,7 @@
 package com.iteaj.network.server.service;
 
 import com.iteaj.network.consts.ExecStatus;
-import com.iteaj.network.protocol.ProtocolType;
+import com.iteaj.network.protocol.CommonProtocolType;
 import com.iteaj.network.server.protocol.NoneDealProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +14,7 @@ public class NoneRequestService extends PlatformRequestService<NoneDealProtocol>
 
     @Override
     public Object protocolType() {
-        return ProtocolType.NoneMap;
+        return CommonProtocolType.NoneMap;
     }
 
     @Override

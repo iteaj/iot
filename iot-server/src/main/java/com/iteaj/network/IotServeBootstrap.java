@@ -1,8 +1,10 @@
 package com.iteaj.network;
 
 import com.iteaj.network.business.BusinessFactory;
-import com.iteaj.network.client.AppClientServerComponent;
+import com.iteaj.network.client.AppServerComponent;
 import com.iteaj.network.client.AppClientServerHandle;
+import com.iteaj.network.client.ClientHandleFactory;
+import com.iteaj.network.client.handle.ClientHandleBeanPostProcessor;
 import com.iteaj.network.server.*;
 import com.iteaj.network.server.codec.DeviceProtocolEncoder;
 import com.iteaj.network.server.handle.EventManagerHandler;
@@ -24,10 +26,7 @@ import io.netty.util.concurrent.DefaultThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -80,10 +79,14 @@ public class IotServeBootstrap implements InitializingBean,DisposableBean
 
     private static Logger logger = LoggerFactory.getLogger(IotServeBootstrap.class);
 
+    public IotServeBootstrap() {
+        System.out.println("kdf");
+    }
+
     @Override
     public void afterPropertiesSet() throws Exception {
-        IotServeBootstrap.BUSINESS_FACTORY = BEAN_FACTORY.getBean(ServerProtocolHandleFactory.class);
         IotServeBootstrap.COMPONENT_FACTORY = BEAN_FACTORY.getBean(ServerComponentFactory.class);
+        IotServeBootstrap.BUSINESS_FACTORY = BEAN_FACTORY.getBean(ServerProtocolHandleFactory.class);
         if(null == BUSINESS_FACTORY) {
             throw new IllegalArgumentException("找不到业务工厂：" + ServerProtocolHandleFactory.class.getName());
         }
@@ -234,11 +237,6 @@ public class IotServeBootstrap implements InitializingBean,DisposableBean
         return new ServerProtocolHandleFactory();
     }
 
-    @Bean
-    public AppClientServerHandle appClientServerService() {
-        return new AppClientServerHandle();
-    }
-
     @Bean({"deviceManager", "devicePipelineManager"})
     @ConditionalOnMissingBean(name = {"devicePipelineManager", "deviceManager"})
     public DevicePipelineManager devicePipelineManager() {
@@ -279,8 +277,20 @@ public class IotServeBootstrap implements InitializingBean,DisposableBean
      */
     @Bean
     @ConditionalOnExpression("${iot.server.app.start:true}")
-    public AppClientServerComponent clientServerComponent(IotServerProperties properties) {
-        return new AppClientServerComponent(properties.getApp());
+    public AppServerComponent appServerComponent(IotServerProperties properties) {
+        return new AppServerComponent(properties.getApp());
+    }
+
+    @Bean
+    @ConditionalOnBean(AppServerComponent.class)
+    public AppClientServerHandle appClientServerHandle(ObjectProvider<ClientHandleFactory> handleFactories) {
+        return new AppClientServerHandle(handleFactories);
+    }
+
+    @Bean
+    @ConditionalOnBean(AppServerComponent.class)
+    public ClientHandleBeanPostProcessor clientHandleFactory() {
+        return new ClientHandleBeanPostProcessor();
     }
 
     /**

@@ -2,7 +2,7 @@ package com.iteaj.network.server.message;
 
 import com.iteaj.network.AbstractMessage;
 import com.iteaj.network.Message;
-import com.iteaj.network.protocol.ProtocolType;
+import com.iteaj.network.protocol.CommonProtocolType;
 
 /**
  * <p>本地回环报文</p>
@@ -15,9 +15,9 @@ import com.iteaj.network.protocol.ProtocolType;
 public class LocalLoopMessage extends AbstractMessage {
 
     private Object param; //本地回环参数
-    private ProtocolType type; //本地回环协议类型
+    private CommonProtocolType type; //本地回环协议类型
 
-    public LocalLoopMessage(ProtocolType type, Object param) {
+    public LocalLoopMessage(CommonProtocolType type, Object param) {
         this.param = param;
         this.type = type;
     }
@@ -40,11 +40,11 @@ public class LocalLoopMessage extends AbstractMessage {
         this.param = param;
     }
 
-    public ProtocolType getType() {
+    public CommonProtocolType getType() {
         return type;
     }
 
-    public void setType(ProtocolType type) {
+    public void setType(CommonProtocolType type) {
         this.type = type;
     }
 
@@ -61,7 +61,7 @@ public class LocalLoopMessage extends AbstractMessage {
         }
 
         @Override
-        public ProtocolType getTradeType() {
+        public CommonProtocolType getTradeType() {
             return LocalLoopMessage.this.type;
         }
 
@@ -75,7 +75,7 @@ public class LocalLoopMessage extends AbstractMessage {
             return null;
         }
 
-        public ProtocolType getType() {
+        public CommonProtocolType getType() {
             return type;
         }
     }

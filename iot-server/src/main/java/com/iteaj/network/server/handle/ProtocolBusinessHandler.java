@@ -64,7 +64,9 @@ public class ProtocolBusinessHandler extends SimpleChannelInboundHandler<UnParse
          *  2. 执行协议动作
          */
         AbstractProtocol abstractProtocol = serverComponent.protocolFactory().getProtocol(msg);
-        if(abstractProtocol instanceof NoneDealProtocol) return;
+        if(abstractProtocol instanceof NoneDealProtocol) {
+            return;
+        }
 
         if(null != abstractProtocol){
 

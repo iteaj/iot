@@ -13,7 +13,9 @@ public class AppClientFactory extends ProtocolFactory<AppClientMessage> {
 
     @Override
     public AbstractProtocol getProtocol(AppClientMessage message) {
-        AbstractProtocol remove = remove(message.getMessageId());
+        String messageId = message.getMessageId();
+        AbstractProtocol remove = remove(messageId);
+
         return remove;
     }
 }

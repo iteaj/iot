@@ -4,7 +4,7 @@ import com.iteaj.iot.client.ClientRequestProtocol;
 import com.iteaj.iot.client.IotClientBootstrap;
 import com.iteaj.iot.client.IotNettyClient;
 import com.iteaj.network.client.app.*;
-import com.iteaj.network.protocol.ProtocolType;
+import com.iteaj.network.protocol.CommonProtocolType;
 
 /**
  * 应用程序客户端和服务端通信的协议
@@ -54,8 +54,8 @@ public class AppClientProtocol extends ClientRequestProtocol<AppClientMessage> {
     }
 
     @Override
-    public ProtocolType protocolType() {
-        return ProtocolType.TCClint;
+    public CommonProtocolType protocolType() {
+        return CommonProtocolType.TCClint;
     }
 
     public String getReason() {

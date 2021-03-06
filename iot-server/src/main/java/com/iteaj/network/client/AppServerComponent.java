@@ -8,15 +8,16 @@ import com.iteaj.network.config.DeviceProperties;
 import com.iteaj.network.consts.ExecStatus;
 import com.iteaj.network.server.component.LengthFieldBasedFrameDecoderComponentAdapter;
 import com.iteaj.network.server.protocol.DeviceRequestProtocol;
+import com.iteaj.network.server.protocol.HeartProtocol;
 import com.iteaj.network.server.protocol.NoneDealProtocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.net.InetSocketAddress;
 
-public class AppClientServerComponent extends LengthFieldBasedFrameDecoderComponentAdapter<AppClientMessage> {
+public class AppServerComponent extends LengthFieldBasedFrameDecoderComponentAdapter<AppClientMessage> {
 
-    public AppClientServerComponent(DeviceProperties deviceProperties) {
+    public AppServerComponent(DeviceProperties deviceProperties) {
         super(deviceProperties, 1024 * 2048, 0, 4, 0, 4);
     }
 
@@ -28,7 +29,7 @@ public class AppClientServerComponent extends LengthFieldBasedFrameDecoderCompon
     @Override
     public AbstractProtocol getProtocol(AppClientMessage message) {
         if(message.getClientType() == AppClientType.App_Client_Heart) {
-            return NoneDealProtocol.getInstance(message.getHead().getEquipCode());
+            return HeartProtocol.getInstance(message).buildRequestMessage();
         } else {
             try {
                 DeviceRequestProtocol requestProtocol = new AppClientServerProtocol(message).buildRequestMessage();

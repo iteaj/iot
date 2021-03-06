@@ -34,16 +34,21 @@ public class AppClientUtil {
 
         AppClientType clientType = AppClientType.getInstance(jsonMessage.getString("clientType"));
         // 返回心跳报文
-        if(clientType == AppClientType.App_Client_Heart) return getHeartMessage(equipCode);
+        if(clientType == AppClientType.App_Client_Heart) {
+            return getHeartMessage(equipCode);
+        }
 
         AppClientMessage appClientMessage = new AppClientMessage(clientType);
         appClientMessage.setType(RequestType.REQ);
-        appClientMessage.setJsonMessage(jsonMessage);
         appClientMessage.setDeviceSn(jsonMessage.getString("deviceSn"));
+
         JSONObject head = jsonMessage.getJSONObject("head");
+        JSONObject body = jsonMessage.getJSONObject("body");
+
+        appClientMessage.setBody(new AppJsonMessageBody(body));
         appClientMessage.setHead(new AppClientMessageHead(equipCode, jsonMessage
                 .getString("messageId"), head.getString("tradeType")
-                , head.getLong("timeout")));
+                , head.getLong("timeout")).setWaiting(head.getBoolean("waiting")));
 
         return appClientMessage;
     }

@@ -11,12 +11,18 @@ public class AppClientMessageHead implements Message.MessageHead {
      */
     private long timeout;
     /**
+     * 是否等待设备端返回
+     */
+    private boolean waiting;
+    /**
      * 应用程序客户端的设备编号, 可为null
      * @see AppClientMessage#getDeviceSn() 要操作的设备的设备编号 必填
      */
     private String equipCode;
     private String messageId;
     private Object tradeType;
+
+    protected AppClientMessageHead() { }
 
     public AppClientMessageHead(String equipCode, String messageId, Object tradeType, long timeout) {
         this.timeout = timeout;
@@ -74,4 +80,14 @@ public class AppClientMessageHead implements Message.MessageHead {
     public void setTimeout(long timeout) {
         this.timeout = timeout;
     }
+
+    public boolean isWaiting() {
+        return waiting;
+    }
+
+    public AppClientMessageHead setWaiting(boolean waiting) {
+        this.waiting = waiting;
+        return this;
+    }
+
 }

@@ -17,6 +17,7 @@ import com.iteaj.network.server.protocol.DeviceRequestProtocol;
  */
 public class AppClientServerProtocol extends DeviceRequestProtocol<AppClientMessage> {
 
+    private String msg = null;
     private Exception failEx;
     public AppClientServerProtocol(AppClientMessage requestMessage) {
         super(requestMessage);
@@ -54,21 +55,17 @@ public class AppClientServerProtocol extends DeviceRequestProtocol<AppClientMess
              */
             AppClientResponseBody responseBody;
             if(getExecStatus() == ExecStatus.成功) {
-                responseBody = new AppClientResponseBody("OK", getExecStatus());
-            } else {
-                String reason = null;
+                this.msg = this.msg == null ? "success" : this.msg;
+            } else if(getFailEx() != null){
                 Throwable cause = getFailEx().getCause();
                 if(cause != null) {
-                    reason = cause.getMessage();
+                    this.msg = cause.getMessage();
+                } else {
+                    this.msg = getFailEx().getMessage();
                 }
-
-                if(reason == null) {
-                    reason = getFailEx().getMessage();
-                }
-
-                responseBody = new AppClientResponseBody(reason, getExecStatus());
             }
 
+            responseBody = new AppClientResponseBody(this.msg, getExecStatus());
             responseMessage = AppClientUtil.buildServerResponseMessage(requestMessage().getHead(), responseBody);
         }
 
@@ -91,6 +88,15 @@ public class AppClientServerProtocol extends DeviceRequestProtocol<AppClientMess
 
     public AppClientServerProtocol setFailEx(Exception failEx) {
         this.failEx = failEx;
+        return this;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public AppClientServerProtocol setMsg(String msg) {
+        this.msg = msg;
         return this;
     }
 }

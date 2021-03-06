@@ -13,7 +13,6 @@ import java.beans.Transient;
 public class AppClientMessage<T extends AppClientMessageBody> extends ClientMessage {
 
     private RequestType type;
-    private JSONObject jsonMessage;
     private AppClientType clientType;
 
     protected AppClientMessage(AppClientType clientType) {
@@ -28,13 +27,15 @@ public class AppClientMessage<T extends AppClientMessageBody> extends ClientMess
     }
 
     /**
-     * 适用于应用程序向服务端发起要操作设备的请求
+     * 适用于应用程序向服务端发起要操作设备的请求, 然后直接返回
      * @param deviceSn 要操作设备的设备编号
      * @param tradeType 要操作的服务端的协议类型 {@link AppClientTypeMatcherHandle#isMatcher(String)}
      * @param messageBody 操作的数据
      * @return
      */
-    public static AppClientMessage<AppClientMessageBody> getInstance(String deviceSn, AppTradeType tradeType, AppClientMessageBody messageBody) {
+    public static AppClientMessage<AppClientMessageBody> getInstance(String deviceSn
+            , AppTradeType tradeType, AppClientMessageBody messageBody) {
+
         if(null == messageBody) throw new ProtocolException("请传入正确的操作内容");
         if(null == tradeType) throw new ProtocolException("请传入正确的操作类型");
         if(!StringUtils.hasText(deviceSn)) throw new ProtocolException("请传入要操作的设备的设备编号");
@@ -42,6 +43,30 @@ public class AppClientMessage<T extends AppClientMessageBody> extends ClientMess
         AppClientMessage appClientMessage = new AppClientMessage(AppClientType.App_Client_Server);
         AppClientMessageHead appClientMessageHead = new AppClientMessageHead(null
                 , appClientMessage.getMessageId(), tradeType.getTradeType());
+        appClientMessage.setDeviceSn(deviceSn);
+        appClientMessage.setBody(messageBody);
+        appClientMessage.setType(RequestType.REQ);
+        appClientMessage.setHead(appClientMessageHead);
+        return appClientMessage;
+    }
+
+    /**
+     * 适用于应用程序向服务端发起要操作设备的请求, 并且等待设备的响应
+     * @param deviceSn 要操作设备的设备编号
+     * @param tradeType 要操作的服务端的协议类型 {@link AppClientTypeMatcherHandle#isMatcher(String)}
+     * @param messageBody 操作的数据
+     * @return
+     */
+    public static AppClientMessage<AppClientMessageBody> getInstanceOfWaiting(String deviceSn
+            , AppTradeType tradeType, AppClientMessageBody messageBody) {
+
+        if(null == messageBody) throw new ProtocolException("请传入正确的操作内容");
+        if(null == tradeType) throw new ProtocolException("请传入正确的操作类型");
+        if(!StringUtils.hasText(deviceSn)) throw new ProtocolException("请传入要操作的设备的设备编号");
+
+        AppClientMessage appClientMessage = new AppClientMessage(AppClientType.App_Client_Server);
+        AppClientMessageHead appClientMessageHead = new AppClientMessageHead(null
+                , appClientMessage.getMessageId(), tradeType.getTradeType()).setWaiting(true);
         appClientMessage.setDeviceSn(deviceSn);
         appClientMessage.setBody(messageBody);
         appClientMessage.setType(RequestType.REQ);
@@ -102,15 +127,6 @@ public class AppClientMessage<T extends AppClientMessageBody> extends ClientMess
     public AppClientMessage<T> setClientType(AppClientType clientType) {
         this.clientType = clientType;
         return this;
-    }
-
-    @Transient
-    public JSONObject getJsonMessage() {
-        return jsonMessage;
-    }
-
-    public void setJsonMessage(JSONObject jsonMessage) {
-        this.jsonMessage = jsonMessage;
     }
 
     public RequestType getType() {

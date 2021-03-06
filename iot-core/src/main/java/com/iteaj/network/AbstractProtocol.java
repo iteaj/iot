@@ -33,7 +33,7 @@ public abstract class AbstractProtocol<M extends AbstractMessage> implements Pro
     private CountDownLatch downLatch; //同步锁字段
 
     /*异步固定线程数量*/
-    private static int ASYNC_THREAD_NUM = 5;
+    private static int ASYNC_THREAD_NUM = 2;
 
     /*业务异步执行器*/
     protected static Executor asyncExecutor;
