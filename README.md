@@ -1,5 +1,7 @@
 #### iot物联网框架
 基于netty, spring boot, redis等开源项目开发来的物联网框架, 支持udp, tcp底层协议和http, mqtt, modbus等上层协议. 支持对设备同步和异步的调用操作. 主要向开发人员开放了一套统一、简洁的用于操作设备的Api接口. 该框架只提供和设备对接部分（通过spring的bean注入解耦特性实现业务和协议实现分离）, 使用此框架的客户必须遵循此框架设计的Api规范;接入一台设备只需创建两三个对象(协议的实现不算在内).并提供丰富的日志输出用于支持调试以及详细的代码注释
+#### 使用文档
+1. [协议之平台请求协议(PlatformRequestProtocol)](https://gitee.com/iteaj/iot/wikis/%E5%B9%B3%E5%8F%B0%E8%AF%B7%E6%B1%82%E5%8D%8F%E8%AE%AE?sort_id=3663625)
 ##### 版本管理
 正式版: 功能较少
 ```
