@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
  * @author iteaj
  * @since 1.7
  */
+@Deprecated
 public abstract class PlatformRequestService<T extends PlatformRequestProtocol> implements ServerProtocolHandle<T> {
 
     /**

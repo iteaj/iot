@@ -10,6 +10,7 @@ import com.iteaj.network.server.protocol.DeviceRequestProtocol;
  * @author iteaj
  * @since 1.7
  */
+@Deprecated
 public interface DeviceRequestService<T extends DeviceRequestProtocol> extends ServerProtocolHandle<T> {
 
     @Override

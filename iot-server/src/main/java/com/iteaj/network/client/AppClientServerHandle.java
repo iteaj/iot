@@ -1,12 +1,11 @@
 package com.iteaj.network.client;
 
-import com.iteaj.network.AbstractProtocol;
 import com.iteaj.network.client.app.AppClientMessage;
 import com.iteaj.network.client.app.AppClientMessageHead;
 import com.iteaj.network.client.app.AppClientType;
 import com.iteaj.network.consts.ExecStatus;
 import com.iteaj.network.server.protocol.PlatformRequestProtocol;
-import com.iteaj.network.server.service.DeviceRequestService;
+import com.iteaj.network.server.service.DeviceRequestHandle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -16,7 +15,7 @@ import org.springframework.beans.factory.ObjectProvider;
  * 对应的协议：
  * @see AppClientServerProtocol
  */
-public class AppClientServerHandle implements DeviceRequestService<AppClientServerProtocol>, InitializingBean {
+public class AppClientServerHandle implements DeviceRequestHandle<AppClientServerProtocol>, InitializingBean {
 
     private ObjectProvider<ClientHandleFactory> handleFactory;
     private Logger logger = LoggerFactory.getLogger(AppClientServerHandle.class);
@@ -26,7 +25,7 @@ public class AppClientServerHandle implements DeviceRequestService<AppClientServ
     }
 
     @Override
-    public Object doBusiness(AppClientServerProtocol protocol) {
+    public Object business(AppClientServerProtocol protocol) {
         AppClientMessage serverMessage = protocol.requestMessage();
 
         try {
